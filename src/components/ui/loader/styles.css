@@ -1,0 +1,9 @@
+@import "../../../app/globals.css";
+
+.loader-container {
+  @apply flex flex-col items-center justify-center gap-2;
+}
+
+.loader {
+  @apply backdrop-blur-sm fixed inset-0 flex items-center justify-center z-50;
+}

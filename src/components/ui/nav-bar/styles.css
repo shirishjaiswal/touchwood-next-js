@@ -1,0 +1,63 @@
+@import "../../../app/globals.css";
+
+#guest-nav-bar {
+  @apply sticky top-0;
+
+  #guest-menu-button-container {
+    @apply flex justify-end w-full;
+    #guest-menu-button {
+      @apply flex items-start justify-end sm:hidden absolute;
+      @apply sm:w-full p-3.5 pr-0 z-50;
+    }
+  }
+
+  #guest-nav-items.guest-nav {
+    @apply sm:flex sm:items-center sm:justify-evenly sm:relative sm:w-full;
+    @apply gap-4 w-full h-16;
+    @apply block w-fit absolute;
+    @apply bg-transparent sm:bg-primary z-50 hidden;
+
+    #side-left {
+      @apply hidden sm:flex items-center justify-center;
+      @apply h-8/12 sm:h-auto w-full;
+      @apply bg-primary;
+
+      #title {
+        @apply hidden sm:block sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-start text-white w-full px-4;
+      }
+    }
+
+    #side-right {
+      @apply hidden sm:flex items-center justify-evenly;
+      @apply h-8/12 xl:w-5/12 lg:w-7/12 md:w-9/12 sm:w-11/12 w-full;
+
+      .nav-item {
+        @apply relative flex flex-col;
+        @apply text-white font-medium hover:text-secondary-100;
+
+        span {
+          @apply transition-all duration-300 ease-in-out group-hover:scale-120 mb-1;
+        }
+
+        .nav-item-underline {
+          @apply absolute left-0 bottom-[-4px] h-0.5 w-0 bg-secondary-100 opacity-0 transition-all duration-300 ease-in-out group-hover:w-full group-hover:scale-120 group-hover:opacity-100;
+        }
+      }
+    }
+  }
+
+  #mobile {
+    #side-right {
+      @apply fixed flex flex-col justify-center items-start gap-9 p-11 z-50;
+      @apply sm:hidden;
+      @apply h-screen w-full;
+      @apply backdrop-blur-lg;
+      @apply text-primary font-medium text-xl hover:text-secondary-100 bg-secondary-100/50;
+
+      .nav-item {
+        @apply relative flex gap-9 w-full;
+        @apply active:bg-secondary-100/50 p-1.5 rounded;
+      }
+    }
+  }
+}
