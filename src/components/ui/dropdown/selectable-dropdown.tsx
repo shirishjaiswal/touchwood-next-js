@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Select, { MultiValue, SingleValue, Props } from "react-select";
 import { BaseFieldProps, EventInterface } from "../type";
 import { ReactSelectOption } from "./types";
 import { getEventFormat } from "../helper";
 import { reactSelectStyles } from "./styles";
-
 
 export interface SelectableDropdownOnChangeEvent extends EventInterface {
   target: {
@@ -18,6 +17,7 @@ export interface SelectableDropdownProps extends BaseFieldProps {
   isMultiSelect?: boolean;
   onChange: (event: SelectableDropdownOnChangeEvent) => void;
   customComponents?: Partial<Props<ReactSelectOption>["components"]>;
+  selectedValues?: ReactSelectOption[];
 }
 
 const SelectableDropdown: React.FC<SelectableDropdownProps> = ({
@@ -34,10 +34,15 @@ const SelectableDropdown: React.FC<SelectableDropdownProps> = ({
   infoContainerStyles,
   labelStyles,
   descriptionStyles,
-  errorStyles
+  errorStyles,
+  selectedValues, // ✅
 }) => {
   const [dropOptions, setDropOptions] = useState<ReactSelectOption[]>(options);
   const [selectedOptions, setSelectedOptions] = useState<ReactSelectOption[]>([]);
+
+  useEffect(() => {
+    setDropOptions(options);
+  }, [options]);
 
   const getError = (): string => {
     if (required && selectedOptions.length === 0) {
@@ -70,8 +75,7 @@ const SelectableDropdown: React.FC<SelectableDropdownProps> = ({
         {label && (
           <label
             id="label"
-            className={`${labelStyles ?? "text-md font-medium text-stone-950"} ${required ? 'after:content-["*"] after:text-rose-700 after:ml-1' : ""
-              }`}
+            className={`${labelStyles ?? "text-md font-medium text-stone-950"} ${required ? 'after:content-["*"] after:text-rose-700 after:ml-1' : ""}`}
           >
             {label}
           </label>
@@ -85,13 +89,16 @@ const SelectableDropdown: React.FC<SelectableDropdownProps> = ({
 
       <div id="input-container" className="relative flex items-center w-full">
         <Select
+          id="selectable-dropdown"
+          instanceId="selectable-dropdown"
+          key="selectable-dropdown"
           className="text-roboto text-sm w-full"
           isDisabled={disabled}
           isMulti={isMultiSelect}
           placeholder={isMultiSelect ? "Select Options" : "Select Option"}
           styles={reactSelectStyles}
           options={dropOptions ?? []}
-          value={selectedOptions}
+          value={selectedValues ?? selectedOptions} // ✅ controlled or internal state
           onChange={handleChange}
           menuPlacement="auto"
           components={customComponents}

@@ -1,0 +1,39 @@
+@import "../../../app/globals.css";
+
+.mobile-toggle-button {
+  @apply fixed top-4 z-40 px-2 sm:hidden;
+  @apply rounded-tl-none rounded-bl-none rounded-4xl;
+  @apply bg-primary text-white;
+}
+
+.sidebar {
+  @apply fixed left-0 z-40 flex flex-col h-screen top-0 ;
+  @apply transition-transform duration-300 ease-in-out sm:translate-x-0;
+  @apply bg-primary text-white;
+
+  .sidebar-header {
+    @apply items-center justify-between border-b border-gray-700 p-4 flex;
+
+    #sidebar-toggle {
+      .arrow-icon-left {
+        @apply ml-auto transition-transform duration-500 ease-in-out;
+      }
+    }
+
+    .sidebar-body {
+      @apply flex-1 space-y-1 overflow-y-auto h-screen;
+
+      .menu-item {
+        @apply flex w-full items-center rounded p-4 sm:py-3 transition hover:bg-gray-700;
+      }
+
+      #submenu-item-container {
+        @apply space-y-1;
+
+        .submenu-item {
+          @apply  block w-full p-2 text-gray-300 hover:text-white pl-4 text-left;
+        }
+      }
+    }
+  }
+}

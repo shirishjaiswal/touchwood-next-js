@@ -1,11 +1,18 @@
+'use client';
 import { useState } from 'react';
-import { MultiValue, SingleValue, Props } from 'react-select';
-import CreatableSelect from 'react-select/creatable';
+import { MultiValue, SingleValue, Props, StylesConfig } from 'react-select';
+import dynamic from 'next/dynamic'; // Import dynamic from Next.js
 import { BaseFieldProps, EventInterface } from '@/components/ui/type';
 import { ReactSelectOption } from '@/components/ui/dropdown/types';
 import { generateUniqueKey } from '@/components/ui/dropdown/helper';
 import { getEventFormat } from '@/components/ui/helper';
 import { styleForTags } from '@/components/ui/dropdown/styles';
+import { ActionMeta } from 'react-select';
+
+// Dynamically import CreatableSelect with SSR disabled
+const CreatableSelect = dynamic(() => import('react-select/creatable'), {
+  ssr: false, // Disable SSR for this component
+});
 
 export interface CreatableDropdownOnChangeEvent extends EventInterface {
   target: {
@@ -40,27 +47,22 @@ const CreatableDropdown: React.FC<CreatableDropdownProps> = ({
   customComponents = {},
 }) => {
   const [dropOptions, setDropOptions] = useState<ReactSelectOption[]>(options);
-  const [selectedOptions, setSelectedOptions] = useState<ReactSelectOption[]>(
-    [],
-  );
+  const [selectedOptions, setSelectedOptions] = useState<ReactSelectOption[]>([]);
 
   const MultiValueLabel = ({ data }: { data: ReactSelectOption }) => {
     if (!data) return <></>;
-    const index =
-      selectedOptions.findIndex((option) => option.value === data.value) + 1;
+    const index = selectedOptions.findIndex((option) => option.value === data.value) + 1;
     return (
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          padding: '6px',
+          padding: '4px',
           fontSize: '14px',
           width: '100%',
         }}
       >
-        <span
-          style={{ fontWeight: 'bold', color: '#1E40AF', marginRight: '6px' }}
-        >
+        <span style={{ fontWeight: 'bold', color: '#1E40AF', marginRight: '6px' }}>
           {index}.
         </span>
         {data.label}
@@ -79,10 +81,7 @@ const CreatableDropdown: React.FC<CreatableDropdownProps> = ({
 
     setDropOptions([...dropOptions, newOption]);
     setSelectedOptions([...selectedOptions, newOption]);
-    const event = getEventFormat(
-      [...dropOptions, newOption],
-      getError(),
-    ) as CreatableDropdownOnChangeEvent;
+    const event = getEventFormat([...dropOptions, newOption], getError()) as CreatableDropdownOnChangeEvent;
     onCreateOption(event);
   };
 
@@ -102,12 +101,10 @@ const CreatableDropdown: React.FC<CreatableDropdownProps> = ({
     setDropOptions(updatedOptions);
     setSelectedOptions(selected);
 
-    const event = getEventFormat(
-      selected,
-      getError(),
-    ) as CreatableDropdownOnChangeEvent;
+    const event = getEventFormat(selected, getError()) as CreatableDropdownOnChangeEvent;
     onChange(event);
   };
+
   const handleCreatableChange = (
     newValue: MultiValue<ReactSelectOption> | SingleValue<ReactSelectOption>,
   ) => {
@@ -120,24 +117,20 @@ const CreatableDropdown: React.FC<CreatableDropdownProps> = ({
     setDropOptions(
       dropOptions.map((item) => ({
         ...item,
-        isSelected: selected.some(
-          (selectedItem) => selectedItem.value === item.value,
-        ),
+        isSelected: selected.some((selectedItem) => selectedItem.value === item.value),
       })),
     );
 
-    const event = getEventFormat(
-      selected,
-      getError(),
-    ) as CreatableDropdownOnChangeEvent;
+    const event = getEventFormat(selected, getError()) as CreatableDropdownOnChangeEvent;
     onChange(event);
   };
 
+  
   const handleChange = (
     newValue: MultiValue<ReactSelectOption> | SingleValue<ReactSelectOption>,
   ) => {
     if (listType) handleListChange(newValue);
-    handleCreatableChange(newValue);
+    else handleCreatableChange(newValue);
   };
 
   const getError = (): string | undefined => {
@@ -155,32 +148,32 @@ const CreatableDropdown: React.FC<CreatableDropdownProps> = ({
           <label
             id="label"
             className={`${labelStyles ?? 'text-md font-medium text-stone-950'} ${
-              required
-                ? 'after:ml-1 after:text-rose-700 after:content-["*"]'
-                : ''
+              required ? 'after:ml-1 after:text-rose-700 after:content-["*"]' : ''
             }`}
           >
             {label}
           </label>
         )}
-        <p
-          id="description"
-          className={`${descriptionStyles ?? 'text-xs font-light text-zinc-800'}`}
-        >
-          {description}
-        </p>
+        {description && (
+          <p
+            id="description"
+            className={descriptionStyles ?? 'text-xs font-light text-zinc-800'}
+          >
+            {description}
+          </p>
+        )}
       </div>
 
       <div id="input-container" className="relative flex w-full items-center">
         <CreatableSelect
-          key="selection-type"
+          key="creatable-select"
           isDisabled={disabled}
           isMulti={true}
-          placeholder="Options List"
+          placeholder=""
           options={dropOptions}
-          styles={styleForTags}
-          components={{ MultiValueLabel, ...customComponents }}
-          onChange={handleChange}
+          styles={styleForTags as StylesConfig<unknown, boolean>}
+          components={{ MultiValueLabel, ...(customComponents as Partial<Props<unknown>['components']>) }}
+          onChange={handleChange as (newValue: unknown, actionMeta: ActionMeta<unknown>) => void}
           value={selectedOptions}
           onCreateOption={handleCreateOption}
         />

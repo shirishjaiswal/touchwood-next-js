@@ -1,13 +1,25 @@
 import { Connection } from "@/utils/api/types";
-import { LOGIN_PAYLOAD_TYPE } from "@/utils/endpoints/types/auth/login";
+
+export type LOGIN_PAYLOAD_TYPE = {
+  email: string;
+  password: string;
+  token?: string | null;
+}
 
 const LOGIN = (payload: LOGIN_PAYLOAD_TYPE) : Connection => {
+  let endpoint = "/api/user/login";
+  if (payload.token) {
+    endpoint = `/api/user/login?token=${payload.token}`;
+  }
+
+  console.log(endpoint);
+  console.log(payload);
   return {
     method: "POST",
-    endpoint: "/auth/login",
+    endpoint: endpoint,
     payload: {
-      "username": payload.username,
-      "password": payload.password
+      "email": payload.email,
+      "password": payload.password,
     },
   };
 };

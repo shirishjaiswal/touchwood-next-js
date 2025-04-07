@@ -1,126 +1,205 @@
-'use server';
+import "server-only";
+import { cookies } from "next/headers";
+import { SignJWT, jwtVerify } from "jose";
+import { jwtDecode } from "jwt-decode";
+import konsole from "@/utils/logging/konsole";
 
-import { cookies } from 'next/headers';
-import { jwtDecode, JwtPayload } from 'jwt-decode';
-import konsole from '@/utils/logging/konsole';
+const secretKey = process.env.SESSION_SECRET;
+const encodedKey = new TextEncoder().encode(secretKey);
+export const sessionRef = process.env.SESSION_REF;
+const refreshTokenRef = "touch_wood_refresh_token";
 
-export interface TW_JwtPayload extends JwtPayload {
-  roles: string[];
-  id: number;
+interface JwtPayload {
+	id: number;
+	userId: string;
+	email: string;
+	roles?: string[];
+	exp?: number;
 }
 
-const COOKIE_NAME = 'Touch_Wood_Session';
+export async function encrypt(payload: {
+	id: number;
+	email: string;
+	roles: string[];
+	expiresAt: Date;
+}) {
+	const token = await new SignJWT(payload)
+		.setProtectedHeader({ alg: "HS256" })
+		.setIssuedAt()
+		.setExpirationTime("7d")
+		.sign(encodedKey);
 
-/* Create session and store access & refresh tokens securely */
+	return token;
+}
+
+export interface SessionPayload {
+	id: number;
+	userId: string;
+	email: string;
+	roles?: string[];
+	exp?: number;
+}
+
+export async function decrypt(
+	session: string | undefined = ""
+): Promise<SessionPayload | undefined> {
+	if (!session) return undefined;
+	try {
+		const { payload } = await jwtVerify(session, encodedKey, {
+			algorithms: ["HS256"],
+		});
+		return {
+			id: payload.id as number,
+			userId: payload.userId as string,
+			email: payload.email as string,
+			roles: payload.roles as string[] | undefined,
+			exp: payload.exp as number | undefined,
+		} as SessionPayload;
+	} catch {
+		return undefined;
+	}
+}
+
+/**
+ * Create a session by adding id, userId, email and roles to the JWT payload.
+ */
 export async function createSession(
-  accessToken: string,
-  refreshToken: string,
-): Promise<void> {
-  try {
-    const decryptedAccessToken = jwtDecode<JwtPayload>(accessToken);
-    const decryptedRefreshToken = jwtDecode<JwtPayload>(refreshToken);
+	id: number,
+	email: string,
+	roles: string[]
+) {
+	const sessionExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+	const session = await encrypt({
+		id,
+		email,
+		roles,
+		expiresAt: sessionExpiresAt,
+	});
+	const refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+	const refreshToken = await encrypt({
+		id,
+		email,
+		roles,
+		expiresAt: refreshTokenExpiresAt,
+	});
+	const cookieStore = await cookies();
 
-    const accessTokenExpiry = decryptedAccessToken.exp;
-    const refreshTokenExpiry = decryptedRefreshToken.exp;
+	if (sessionRef) {
+		cookieStore.set(sessionRef, session, {
+			httpOnly: true,
+			secure: true,
+			expires: sessionExpiresAt,
+			sameSite: "lax",
+			path: "/",
+		});
+	} else {
+		throw new Error("SESSION_REF is not defined");
+	}
 
-    const cookieStore = await cookies();
-
-    cookieStore.set(COOKIE_NAME, accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      expires: accessTokenExpiry
-        ? new Date(accessTokenExpiry * 1000)
-        : undefined,
-      sameSite: 'strict',
-      path: '/',
-    });
-
-    cookieStore.set(COOKIE_NAME, refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      expires: refreshTokenExpiry
-        ? new Date(refreshTokenExpiry * 1000)
-        : undefined,
-      sameSite: 'strict',
-      path: '/',
-    });
-  } catch (error) {
-    console.error('Failed to create session:', error);
-    throw new Error('Failed to create session');
-  }
+	cookieStore.set(refreshTokenRef, refreshToken, {
+		httpOnly: true,
+		secure: true,
+		expires: refreshTokenExpiresAt,
+		sameSite: "lax",
+		path: "/",
+	});
 }
 
-/* Delete session by clearing stored tokens */
-export async function deleteSession(): Promise<void> {
-  try {
-    const cookieStore = await cookies();
+// Get session sesstionref
+export async function getCookie() {
+	const cookieStore = await cookies();
+	if (!sessionRef) {
+		throw new Error("SESSION_REF is not defined");
+	}
+	return cookieStore.get(sessionRef)?.value;
+}
 
-    cookieStore.delete(COOKIE_NAME);
-  } catch (error) {
-    console.error('Failed to delete session:', error);
-    throw new Error('Failed to log out user');
-  }
+/**
+ * Update the session by adding id, userId, email and roles to the JWT payload.
+ */
+export async function updateSession() {
+	const session = (await cookies()).get("session")?.value;
+	const payload = await decrypt(session);
+
+	if (!session || !payload) {
+		return null;
+	}
+
+	const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+	const cookieStore = await cookies();
+	cookieStore.set("session", session, {
+		httpOnly: true,
+		secure: true,
+		expires: expires,
+		sameSite: "lax",
+		path: "/",
+	});
+}
+
+export async function deleteSession() {
+	const cookieStore = await cookies();
+	if (sessionRef) {
+		cookieStore.delete(sessionRef);
+	} else {
+		console.error("SESSION_REF is not defined");
+	}
 }
 
 /* Validate token by checking expiration */
 export async function validateToken(
-  accessToken: string | undefined,
+	accessToken: string | undefined
 ): Promise<boolean> {
-  try {
-    if (!accessToken) return false;
-    const decryptedAccessToken = jwtDecode<JwtPayload>(accessToken);
-    const accessTokenExpiry = decryptedAccessToken.exp;
-    return accessTokenExpiry
-      ? accessTokenExpiry > Math.floor(Date.now() / 1000)
-      : false;
-  } catch (error) {
-    konsole.error('Error in createSession:', error);
-    throw new Error('Failed to create session');
-  }
+	try {
+		if (!accessToken) return false;
+		const decryptedAccessToken = jwtDecode<JwtPayload>(accessToken);
+		const accessTokenExpiry = decryptedAccessToken.exp;
+		return accessTokenExpiry
+			? accessTokenExpiry > Math.floor(Date.now() / 1000)
+			: false;
+	} catch (error) {
+		konsole.error("Error in validateToken:", error);
+		throw new Error("Failed to validate token");
+	}
 }
 
-/* Get user role from JWT token */
-export async function getRole(
-  accessToken: string | undefined,
-): Promise<string> {
-  try {
-    if (!accessToken) return '';
-    const decryptedAccessToken = jwtDecode<TW_JwtPayload>(accessToken);
-    return decryptedAccessToken.roles?.[0] || '';
-  } catch (error) {
-    konsole.error('Error in getting role:', error);
-    throw new Error('Failed to get roles');
-  }
+export async function getUserRoles(): Promise<string[]> {
+	try {
+		const accessToken = await getCookie();
+		if (!accessToken) return [];
+		const decodedToken = jwtDecode<JwtPayload>(accessToken);
+		return decodedToken.roles || [];
+	} catch (error) {
+		console.error("Error in getting roles:", error);
+		throw new Error("Failed to get roles");
+	}
 }
 
 /**
  * Get user ID from JWT token
  */
-export async function getUserId(
-  accessToken: string | undefined,
-): Promise<number> {
-  try {
-    if (!accessToken) return -1;
-    const decryptedAccessToken = jwtDecode<TW_JwtPayload>(accessToken);
-    return decryptedAccessToken.id ?? -1;
-  } catch (error) {
-    console.error('Error in getting user ID:', error);
-    throw new Error('Failed to get user ID');
-  }
+export async function getUserId(): Promise<number> {
+	try {
+		const accessToken = await getCookie();
+		if (!accessToken) return -1;
+		const decodedToken = jwtDecode<JwtPayload>(accessToken);
+		return decodedToken.id ?? -1;
+	} catch (error) {
+		console.error("Error in getting user ID:", error);
+		throw new Error("Failed to get user ID");
+	}
 }
 
 /**
- * Get username (subject) from JWT token
+ * Get user email from JWT token
  */
-export async function getUserName(
-  accessToken: string | undefined,
-): Promise<string> {
-  try {
-    if (!accessToken) return '';
-    const decryptedAccessToken = jwtDecode<JwtPayload>(accessToken);
-    return decryptedAccessToken.sub ?? '';
-  } catch (error) {
-    console.error('Error in getting username:', error);
-    throw new Error('Failed to get username');
-  }
+export async function getUserEmail(): Promise<string> {
+	try {
+		const accessToken = await getCookie();
+		if (!accessToken) return "";
+		const decodedToken = jwtDecode<JwtPayload>(accessToken);
+		return decodedToken.email ?? "";
+	} catch (error) {
+		console.error("Error in getting user email:", error);
+		throw new Error("Failed to get user email");
+	}
 }

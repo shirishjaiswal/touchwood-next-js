@@ -1,0 +1,29 @@
+@import "../../../app/globals.css";
+
+#user-details.empty-tab-list {
+  @apply flex flex-col items-center justify-center gap-2;
+  @apply bg-neutral-200 rounded-lg p-12;
+
+  .user-details--no-tabs__title {
+    @apply text-2xl font-semibold text-primary-600 text-center;
+  }
+}
+#user-details.tab-list {
+  @apply  space-x-2 border-b hidden sm:flex;
+
+  .user-details--tab__container {
+    @apply flex items-center relative min-w-fit px-4 py-2 transition-colors;
+
+    .user-details--tab__link {
+      @apply flex-grow transition-colors;
+    }
+
+    .active-tab--edit-button {
+      @apply ml-2  transition-opacity duration-300 delay-200;
+    }
+
+    .user-details--tab__form{
+      @apply flex w-full flex-col gap-4;
+    }
+  }
+}

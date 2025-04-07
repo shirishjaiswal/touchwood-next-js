@@ -31,13 +31,6 @@ const clientApiRequest = async ({
     // Set Authorization header if token exists
     if (token) finalHeaders["Authorization"] = `Bearer ${token}`;
 
-    konsole.log("Client API Request Config:", {
-      method: connection.method,
-      url: CLIENT_ENDPOINT,
-      headers: finalHeaders,
-      data: connection?.payload,
-    });
-
     // Make API request using centralized Axios instance
     const response = await axiosInstance.request({
       method: connection.method,
@@ -45,7 +38,6 @@ const clientApiRequest = async ({
       headers: finalHeaders,
       data: connection?.payload,
     });
-
     return { data: response.data ?? null, error: null };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {

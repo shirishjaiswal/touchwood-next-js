@@ -72,6 +72,7 @@ const BaseClass =
   'font-medium text-center w-fit rounded-lg focus:outline-none transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed';
 
 export interface ClickButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  id: string;
   label?: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
@@ -80,6 +81,7 @@ export interface ClickButtonProps extends React.ButtonHTMLAttributes<HTMLButtonE
 }
 
 const ClickButton: React.FC<ClickButtonProps> = ({
+  id,
   type = 'button',
   label = 'Click Button',
   variant = 'default',
@@ -92,6 +94,7 @@ const ClickButton: React.FC<ClickButtonProps> = ({
 }) => {
   return (
     <button
+      id={id}
       type={type}
       className={`${BaseClass} ${VariantClass[variant]} ${SizeClass[size]} ${className}`}
       onClick={onClick}
@@ -99,7 +102,7 @@ const ClickButton: React.FC<ClickButtonProps> = ({
       role='button'
       {...props}
     >
-      {loading && <LoaderCircle className="mr-2 inline animate-spin" />}
+      {loading && <LoaderCircle className="absolute animate-spin" />}
       {props.children || label}
     </button>
   );

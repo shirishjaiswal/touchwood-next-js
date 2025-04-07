@@ -63,8 +63,6 @@ const serverApiRequest = async ({
     return { data: response.data ?? null, error: null };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.error('API Request Error:', error?.message || error);
-
     return {
       data: null,
       error:

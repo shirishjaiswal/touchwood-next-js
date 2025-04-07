@@ -1,0 +1,7 @@
+@import "../../../app/globals.css";
+
+.card {
+  @apply bg-white rounded-md shadow-md p-4;
+  @apply drop-shadow-2xl shadow-2xl shadow-primary;
+  @apply w-fit h-fit;
+}

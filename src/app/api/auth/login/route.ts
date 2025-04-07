@@ -1,52 +1,75 @@
-import { NextResponse } from 'next/server';
-import { loginSchema } from '@/app/api/auth/validation';
-import konsole from '@/utils/logging/konsole';
-import serverApiRequest from '@/utils/api/server-api-request';
-import LOGIN, {
-} from '@/utils/endpoints/external/auth/login';
-import { createSession } from '@/lib/session/session';
-import { LOGIN_PAYLOAD_TYPE } from '@/utils/endpoints/types/auth/login';
+import { NextResponse } from "next/server";
+import { loginSchema } from "@/app/api/auth/validation";
+import serverApiRequest from "@/utils/api/server-api-request";
+import LOGIN_ENDPOINT, {
+	LOGIN_PAYLOAD_TYPE,
+} from "@/utils/endpoints/external/auth/login";
+import { createSession } from "@/lib/session/session";
+import { hashPassword } from "@/lib/validations/hashPassword";
 
 export async function POST(request: Request) {
-  try {
-    const body: LOGIN_PAYLOAD_TYPE = await request.json();
+	try {
+		const requestUrl = new URL(request.url);
+		const rawToken = requestUrl.searchParams.get("token");
+		const token = rawToken ? encodeURIComponent(rawToken) : null;
+		const body = await request.json();
+		const validationResult = loginSchema.safeParse(body);
 
-    const parsedData = loginSchema.safeParse(body);
+		if (!validationResult.success) {
+			return NextResponse.json(
+				{
+					error: validationResult.error.errors[0].message,
+				},
+				{
+					status: 422,
+					statusText: "Unprocessable Entity",
+				}
+			);
+		}
 
-    if (!parsedData.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          errors: parsedData.error.errors.map((e) => e.message),
-        },
-        { status: 400 },
-      );
-    }
+		const { email, password } = validationResult.data;
+		const encryptedPassword = await hashPassword(password);
+		const loginPayload: LOGIN_PAYLOAD_TYPE = {
+			email,
+			password: encryptedPassword,
+			token,
+		};
 
-    const apiResponse = await serverApiRequest({
-      connection: LOGIN(body),
-    });
+		const loginResponse = await serverApiRequest({
+			connection: LOGIN_ENDPOINT(loginPayload),
+		});
 
-    if (!apiResponse?.data) {
-      return NextResponse.json(
-        { error: apiResponse?.error || 'Authentication failed' },
-        { status: 500 },
-      );
-    }
+		if (loginResponse?.error) {
+			return NextResponse.json(
+				{
+					error: loginResponse.error,
+				},
+				{
+					status: 401,
+					statusText: "Unauthorized",
+				}
+			);
+		}
 
-    await createSession(
-      apiResponse.data.accessToken,
-      apiResponse.data.refreshToken,
-    );
+		const { id: userId, email: userEmail, roles } = loginResponse.data;
+		const roleValues = roles.map(
+			(role: { id: number; value: string }) => role.value
+		);
 
-    const response = NextResponse.json({ status: 200 });
+		await createSession(userId, userEmail, roleValues);
 
-    return response;
-  } catch (error) {
-    konsole.error('Login API Error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Internal Server Error' },
-      { status: 500 },
-    );
-  }
+		return NextResponse.redirect(new URL("/", requestUrl));
+	} catch (error) {
+		const errorMessage =
+			error instanceof Error ? error.message : "An unknown error occurred";
+		return NextResponse.json(
+			{
+				error: errorMessage,
+			},
+			{
+				status: 500,
+				statusText: "Internal Server Error",
+			}
+		);
+	}
 }

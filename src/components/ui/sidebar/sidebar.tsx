@@ -1,144 +1,256 @@
-'use client';
-import { useState } from 'react';
+"use client";
+import "@/components/ui/sidebar/styles.css";
+import { useEffect, useState } from "react";
+import { Hamburger, CloseX, Arrow } from "@/components/ui/icons";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import Badge from "@/components/ui/badge/badge";
+import ClickButton from "@/components/ui/button/click-button";
+import { useRouter } from "next/navigation";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Home,
-  Settings,
-  FileText,
-  Users,
-  Menu,
-  ChevronDown,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import Badge from '@/components/ui/badge/badge';
-import ClickButton from '../button/click-button';
+	MenuItem,
+	menuItems,
+	SubMenuItem,
+} from "@/components/ui/sidebar/sidebar-data";
 
-const menuItems = [
-  { id: 1, title: 'Dashboard', icon: Home },
-  {
-    id: 2,
-    title: 'Users',
-    icon: Users,
-    submenu: [
-      { id: 21, title: 'All Users' },
-      { id: 22, title: 'Admins' },
-    ],
-  },
-  { id: 3, title: 'Reports', icon: FileText, chip: 'New' },
-  {
-    id: 4,
-    title: 'Settings',
-    icon: Settings,
-    submenu: [
-      { id: 41, title: 'Profile' },
-      { id: 42, title: 'Preferences' },
-    ],
-  },
-];
+const rolePriority: Record<string, number> = {
+	"super-admin": 1,
+	admin: 2,
+	organization: 3,
+	user: 4,
+};
+export default function Sidebar({ roles }: { roles: string[] }) {
+	const router = useRouter();
+	const [isExpanded, setIsExpanded] = useState(false);
+	const [openSubmenu, setOpenSubmenu] = useState<number | null>(null);
+	const [isMobileOpen, setIsMobileOpen] = useState(false);
+	const [priorityRole, setPriorityRole] = useState<string | null>(null);
 
-export default function Sidebar() {
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [openSubmenu, setOpenSubmenu] = useState(null);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+	useEffect(() => {
+		if (roles.length === 0) {
+			setPriorityRole(null);
+			return;
+		}
 
-  const toggleSidebar = () => {
-    setIsExpanded((prev) => !prev)
-    setOpenSubmenu(null)
-  };
-  const toggleSubmenu = (id) => setOpenSubmenu((prev) => (prev === id ? null : id));
-  const toggleMobileSidebar = () => setIsMobileOpen((prev) => !prev);
+		// Find the role with the highest priority (smallest number)
+		const highestPriorityRole = roles.reduce((highest, role) => {
+			return rolePriority[role] > rolePriority[highest] ? role : highest;
+		}, roles[0]);
 
-  return (
-    <>
-      {/* Mobile Menu Button */}
-      <ClickButton
-      variant='none'
-        size="none"
-        onClick={toggleMobileSidebar}
-        className="fixed top-4 z-50 rounded-tl-none rounded-bl-none rounded-tr-4xl rounded-br-4xl px-4 bg-primary text-white sm:hidden"
-      >
-        <Menu width={36} height={36} />
-      </ClickButton>
+		setPriorityRole(highestPriorityRole);
+	}, [roles]);
+	const toggleSidebar = () => {
+		setIsExpanded((prev) => !prev);
+		setOpenSubmenu(null);
+	};
 
-      {/* Sidebar */}
-      <motion.div
-       initial={{ width: '4rem' }}
-       animate={{ width: isExpanded ? '18rem' : '4rem' }}
-       transition={{ duration: 0.3, ease: 'easeInOut' }}
-        className={cn(
-          'bg-primary fixed sm:top-16 left-0 z-40 flex h-screen flex-col text-white  transition-transform duration-300 ease-in-out ',
-          isExpanded ? 'w-72' : 'w-20',
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full',
-          'sm:translate-x-0'
-        )}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-700  p-4">
-          {isExpanded && <span className="text-lg font-semibold">Sidebar</span>}
-          <ClickButton
-            variant="none"
-            size="none"
-            onClick={toggleSidebar}
-            className="hidden rounded sm:block"
-          >
-            {isExpanded ? <ChevronLeft /> : <ChevronRight />}
-          </ClickButton>
-        </div>
+	const toggleSubmenu = (id: number | null) =>
+		setOpenSubmenu((prev) => (prev === id ? null : id));
+	const toggleMobileSidebar = () => {
+		setIsExpanded(false);
+		setOpenSubmenu(null);
+		setIsMobileOpen((prev) => !prev);
+	};
+	const toggleBackDropClick = () => {
+		setIsExpanded(false);
+		setIsMobileOpen(false);
+		setOpenSubmenu(null);
+	};
+	const onClickMenuItem = (item: MenuItem) => {
+		if (item.submenu) {
+			if (!isExpanded) toggleSidebar();
+			toggleSubmenu(item.id);
+		}
+		if (!item.submenu && isExpanded) {
+			setIsExpanded(false);
+			setOpenSubmenu(null);
+		}
+		if (!item.submenu && item.onClick) {
+			item.onClick();
+		} else if (item.redirect) {
+			router.push(item.redirect);
+		}
+		if (item.title === "Logout") {
+			setTimeout(() => {
+				window.location.reload();
+			}, 500);
+		}
+	};
 
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 overflow-y-auto">
-          {menuItems.map((item) => (
-            <div key={item.id}>
-              <ClickButton
-                variant="none"
-                size="none"
-                className="flex w-full items-center rounded p-4 sm:py-3 transition hover:bg-gray-700"
-                onClick={() => item.submenu && toggleSubmenu(item.id)}
-              >
-                <item.icon className="h-5 w-5" />
-                {isExpanded && (
-                  <span className="ml-3">{item.title}</span>
-                )}
-                {item.chip && isExpanded && (
-                  <Badge size="xs" color="yellow">
-                    {item.chip}
-                  </Badge>
-                )}
-                {item.submenu && isExpanded && (
-                  <ChevronDown
-                    className={cn(
-                      'ml-auto transition-transform',
-                      openSubmenu === item.id && 'rotate-180'
-                    )}
-                  />
-                )}
-              </ClickButton>
+	const onClickSubMenuItem = (subMenu: SubMenuItem) => {
+		toggleBackDropClick();
+		router.push(subMenu.redirect || "/");
+		if (subMenu.onClick) {
+			subMenu.onClick();
+		} else if (subMenu.redirect) {
+			router.push(subMenu.redirect || "/");
+		}
+	};
 
-              {/* Submenu */}
-              {item.submenu && openSubmenu === item.id && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="ml-8 space-y-1"
-                >
-                  {item.submenu.map((sub) => (
-                    <ClickButton
-                      key={sub.id}
-                      variant="none"
-                      size="none"
-                      className="block w-full p-2 text-gray-300 hover:text-white pl-4 text-left"
-                    >
-                      {sub.title}
-                    </ClickButton>
-                  ))}
-                </motion.div>
-              )}
-            </div>
-          ))}
-        </nav>
-      </motion.div>
-    </>
-  );
+	return (
+		<>
+			{/* Mobile Menu Button */}
+			{isMobileOpen ? (
+				<ClickButton
+					id="mobile-toggle-button"
+					variant="none"
+					size="none"
+					onClick={isExpanded ? toggleMobileSidebar : toggleSidebar}
+					className="mobile-toggle-button rounded sm:block z-20"
+				>
+					{isExpanded ? (
+						<CloseX width={36} height={36} />
+					) : (
+						<Arrow
+							className={cn(
+								"arrow-icon-left",
+								isExpanded ? "rotate-0" : "rotate-180"
+							)}
+						/>
+					)}
+				</ClickButton>
+			) : (
+				<ClickButton
+					id="mobile-toggle-button"
+					variant="none"
+					size="none"
+					onClick={toggleMobileSidebar}
+					className="mobile-toggle-button"
+				>
+					<Hamburger width={36} height={36} />
+				</ClickButton>
+			)}
+
+			{(isMobileOpen || isExpanded) && (
+				<button
+					className="fixed h-screen w-full backdrop-blur-xs z-40 bg-secondary-10"
+					onClick={toggleBackDropClick}
+				></button>
+			)}
+			{/* Sidebar */}
+			<motion.div
+				animate={{ width: isExpanded ? "18rem" : "4rem" }}
+				transition={{ duration: 0.3, ease: "easeInOut" }}
+				className={cn(
+					"sidebar",
+					isExpanded ? "w-72" : "w-20",
+					isMobileOpen ? "translate-x-0" : "-translate-x-full"
+				)}
+			>
+				{/* Header */}
+				<header className="sidebar-header">
+					{isExpanded && (
+						<ClickButton
+							id="sidebar-header-content"
+							variant="none"
+							size="none"
+							className="sidebar-header-content"
+						>
+							Sidebar
+						</ClickButton>
+					)}
+					<ClickButton
+						id="sidebar-toggle"
+						variant="none"
+						size="none"
+						onClick={toggleSidebar}
+						className="hidden rounded sm:block"
+					>
+						{isExpanded ? (
+							<CloseX />
+						) : (
+							<Arrow className="arrow-icon-left rotate-180" />
+						)}
+					</ClickButton>
+					{isMobileOpen && isExpanded ? (
+						<ClickButton
+							id="sidebar-toggle"
+							variant="none"
+							size="none"
+							onClick={toggleMobileSidebar}
+							className=""
+						>
+							<CloseX />
+						</ClickButton>
+					) : (
+						<ClickButton
+							id="sidebar-toggle"
+							variant="none"
+							size="none"
+							onClick={toggleSidebar}
+							className="sm:hidden"
+						>
+							<Arrow className="rotate-180" />
+						</ClickButton>
+					)}
+				</header>
+				{/* Navigation */}
+				<main className="sidebar-body">
+					{menuItems.map(
+						(item) =>
+							priorityRole &&
+							item.role.some(
+								(role) => role.toLowerCase() === priorityRole.toLowerCase()
+							) && (
+								<div key={item.id}>
+									<ClickButton
+										id={`menu-item-${item.id}`}
+										variant="none"
+										size="none"
+										className="menu-item flex w-full items-center rounded p-4 sm:py-3 transition hover:bg-gray-700"
+										onClick={() => onClickMenuItem(item)}
+										title={item.title}
+									>
+										{item.icon && <item.icon className="h-6 w-6" />}
+										{isExpanded && <span className="ml-3">{item.title}</span>}
+										{item.chip && isExpanded && (
+											<Badge size="xs" color="yellow">
+												{item.chip}
+											</Badge>
+										)}
+										{item.submenu && isExpanded && (
+											<Arrow
+												className={cn(
+													"ml-auto transition-transform rotate-270",
+													openSubmenu === item.id && "rotate-90"
+												)}
+											/>
+										)}
+									</ClickButton>
+
+									{/* Submenu */}
+									{item.submenu && openSubmenu === item.id && (
+										<motion.div
+											initial={{ opacity: 0, height: 0 }}
+											animate={{ opacity: 1, height: "auto" }}
+											className="submenu-item-container ml-8 space-y-1 "
+										>
+											{item.submenu.map(
+												(sub) =>
+													priorityRole &&
+													sub.role.some(
+														(role) =>
+															role.toLowerCase() === priorityRole.toLowerCase()
+													) && (
+														<ClickButton
+															id={`submenu-item-${sub.id}`}
+															key={sub.id}
+															variant="none"
+															size="none"
+															className="submenu-item block w-full p-2 text-gray-300 hover:bg-gray-700 opacity-100 hover:text-white pl-4 text-left"
+															onClick={() => onClickSubMenuItem(sub)}
+														>
+															{sub.title}
+														</ClickButton>
+													)
+											)}
+										</motion.div>
+									)}
+								</div>
+							)
+					)}
+				</main>
+			</motion.div>
+		</>
+	);
 }

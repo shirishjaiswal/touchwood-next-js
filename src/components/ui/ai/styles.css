@@ -1,0 +1,20 @@
+@import "../../../app/globals.css";
+
+.shadow {
+  @apply drop-shadow-2xl shadow-2xl shadow-primary;
+}
+
+#live-chat-button {
+  @apply fixed bottom-6 right-6 p-4;
+  @apply flex items-center justify-center rounded-full;
+  @apply bg-neutral-600 hover:bg-accent-900 text-white;
+}
+
+#ai-help-box-container {
+  @apply transition duration-300 ease-in-out;
+
+  #chat-form {
+    @apply flex items-center bg-white drop-shadow-2xl shadow-2xl rounded-lg p-0.5 ;
+    
+  }
+}

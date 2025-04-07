@@ -35,7 +35,7 @@ export const ModalBox: React.FC<ModalBoxProps> = ({
     <>
       <button
         id="backdrop"
-        className={'bg-opacity-40 fixed inset-0 z-50 backdrop-blur-lg'}
+        className={'bg-opacity-40 fixed inset-0 z-50 backdrop-blur-md'}
         onClick={onClose}
       />
       <dialog
@@ -54,7 +54,7 @@ export const ModalBox: React.FC<ModalBoxProps> = ({
         <div className={`w-full ${dialogContentStyle_mb}`}>
           <h2
             id="dialog-title"
-            className={`mb-1 border-b border-gray-200 text-xl font-semibold ${titleStyle_mb}`}
+            className={`mb-1 border-b border-gray-200 text-lg font-semibold ${titleStyle_mb}`}
           >
             {title}
           </h2>
@@ -65,7 +65,9 @@ export const ModalBox: React.FC<ModalBoxProps> = ({
             {subtitle}
           </p>
         </div>
-        {children}
+        <div className='h-full w-full'>
+          {children}
+        </div>
       </dialog>
     </>
   );

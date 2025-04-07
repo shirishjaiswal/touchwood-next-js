@@ -1,6 +1,5 @@
 const log = (...args: unknown[]) => {
   if (process.env.NEXT_PUBLIC_NODE_ENV?.toLowerCase() === "development") {
-    console.log(...args);
   }
 };
 

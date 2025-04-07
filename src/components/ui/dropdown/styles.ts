@@ -1,6 +1,8 @@
 import { StylesConfig } from "react-select";
 import { ReactSelectOption } from "./types";
 
+
+
 export const reactSelectStyles: StylesConfig<ReactSelectOption, boolean> = {
   menu: (provided) => ({
     ...provided,
@@ -41,24 +43,22 @@ export const reactSelectStyles: StylesConfig<ReactSelectOption, boolean> = {
       color: "#374151",
     },
   }),
-  control: (provided) => ({
+  control: (provided, state) => ({
     ...provided,
-    width: "100%",
-    padding: "0 6px", 
+    width: '100px',
+    padding: "0 6px",
     height: "30px",
-    backgroundColor: "#F9FAFB",
-    border: "1px solid #D1D5DB",
+    backgroundColor: state.isDisabled ? "#F3F4F6" : "#F9FAFB",
+    border: state.isFocused
+      ? "1px solid #3B82F6"
+      : "1px solid #D1D5DB",
     borderRadius: "6px",
     boxShadow: "none",
-    cursor: "text",
+    cursor: state.isDisabled ? "not-allowed" : "text",
     display: "flex",
-    alignItems: "center", 
-    justifyContent: "flex-start",
+    alignItems: "center",
     fontSize: "0.75rem",
     lineHeight: "1.2",
-    "&:hover": {
-      borderColor: "#3B82F6",
-    },
   }),
   multiValue: (provided) => ({
     ...provided,
@@ -77,23 +77,21 @@ export const reactSelectStyles: StylesConfig<ReactSelectOption, boolean> = {
   }),
   multiValueRemove: (provided) => ({
     ...provided,
-    color: "#3B82F6", 
+    color: "#3B82F6",
     cursor: "pointer",
     marginLeft: "4px",
     borderRadius: "50%",
-    width: "16px", 
+    width: "16px",
     height: "16px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     "&:hover": {
       color: "#EF4444",
-      backgroundColor: "#FEE2E2", 
+      backgroundColor: "#FEE2E2",
     },
   }),
-  indicatorSeparator: () => ({
-    display: "none",
-  }),
+  indicatorSeparator: () => ({ display: "none" }),
   valueContainer: (provided) => ({
     ...provided,
     display: "flex",
@@ -119,9 +117,9 @@ export const styleForTags: StylesConfig<ReactSelectOption, boolean> = {
     padding: "6px 6px",
     height: "auto",
     backgroundColor: "#F9FAFB",
-    border: "1px solid #D1D5DB",
+    border: "1px solid #056D82",
     borderRadius: "6px",
-    boxShadow: "none",
+    boxShadow: "-moz-initial",
     cursor: "text",
     display: "flex",
     alignItems: "center",
@@ -145,7 +143,6 @@ export const styleForTags: StylesConfig<ReactSelectOption, boolean> = {
     backgroundColor: "#E0F2FE",
     borderRadius: "9999px",
     padding: "2px 8px",
-    width: "100%",
     alignItems: "center",
   }),
   multiValueLabel: (provided) => ({
