@@ -11,6 +11,7 @@ export async function middleware(request: NextRequest) {
 	const isAuthenticated = await getCookie();
 	const userRoles = await getUserRoles();
 
+	console.log(userRoles);
 	// Define public paths
 	const publicPaths = ["/", /^\/auth\/.*/];
 
@@ -28,14 +29,14 @@ export async function middleware(request: NextRequest) {
 			return NextResponse.redirect(loginUrl);
 		}
 
-		if (!userRoles.includes("admin")) {
+		if (!userRoles.includes("Admin")) {
 			// Redirect non-admin users trying to access admin routes
 			return NextResponse.redirect(new URL("/home/user/role", request.url));
 		}
 	}
 
 	// User Route Protection: Redirect non-admin users to /home/user/role first time
-	if (isAuthenticated && !userRoles.includes("admin")) {
+	if (isAuthenticated && !userRoles.includes("Admin")) {
 		const hasVisitedRolePage = request.cookies.get("visitedRolePage");
 
 		if (!hasVisitedRolePage && url !== "/home/user/role") {

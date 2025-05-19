@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import serverApiRequest from "@/utils/api/server-api-request";
-import GET_EMAIL_TEMPLATE_BY_LABEL from "@/utils/endpoints/external/email-templates/get-by-label";
+import GET_EMAIL_TEMPLATE_BY_LABEL from "@/utils/endpoints/external/email-template/get-by-label";
 import konsole from "@/utils/logging/konsole";
 
 export async function GET(

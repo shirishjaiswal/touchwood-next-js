@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import serverApiRequest from "@/utils/api/server-api-request";
-import CREATE_ACCESS_MODIFIER, { CREATE_ACCESS_MODIFIER_PAYLOAD } from "@/utils/endpoints/external/access-modifier/create";
+import CREATE_DATA_ACCESS_MODIFIER, {
+	CREATE_ACCESS_MODIFIER_PAYLOAD,
+} from "@/utils/endpoints/external/data-access-modifier/create";
 
 export async function POST(request: Request) {
 	try {
@@ -8,12 +10,12 @@ export async function POST(request: Request) {
 
 		const { accessModifierValue } = rawBody;
 
-		const accessModifier : CREATE_ACCESS_MODIFIER_PAYLOAD = {
+		const accessModifier: CREATE_ACCESS_MODIFIER_PAYLOAD = {
 			value: accessModifierValue,
-		}
-		
+		};
+
 		const apiResponse = await serverApiRequest({
-			connection: CREATE_ACCESS_MODIFIER(accessModifier),
+			connection: CREATE_DATA_ACCESS_MODIFIER(accessModifier),
 		});
 
 		if (!apiResponse?.data) {

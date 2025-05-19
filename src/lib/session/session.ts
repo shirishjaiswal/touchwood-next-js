@@ -1,4 +1,5 @@
 import "server-only";
+
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import { jwtDecode } from "jwt-decode";
@@ -105,7 +106,6 @@ export async function createSession(
 	});
 }
 
-// Get session sesstionref
 export async function getCookie() {
 	const cookieStore = await cookies();
 	if (!sessionRef) {
@@ -114,9 +114,6 @@ export async function getCookie() {
 	return cookieStore.get(sessionRef)?.value;
 }
 
-/**
- * Update the session by adding id, userId, email and roles to the JWT payload.
- */
 export async function updateSession() {
 	const session = (await cookies()).get("session")?.value;
 	const payload = await decrypt(session);

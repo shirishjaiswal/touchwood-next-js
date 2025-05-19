@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import serverApiRequest from "@/utils/api/server-api-request";
-import GET_ALL_EMAILS_TEMPLATE_ID_LABEL from "@/utils/endpoints/external/email-templates/get-all-id-labels";
+import GET_ALL_EMAILS_TEMPLATE_ID_LABEL from "@/utils/endpoints/external/email-template/get-all-id-labels";
 
 export async function GET() {
 	try {

@@ -1,4 +1,5 @@
 import { Connection } from "@/utils/api/types";
+import { PrefixEndpoint } from "@/utils/endpoints/external/index";
 
 export type CREATE_USER_EMAIL_SECURE_TOKEN_PAYLOAD= {
   emailPassword: string;
@@ -8,7 +9,7 @@ export type CREATE_USER_EMAIL_SECURE_TOKEN_PAYLOAD= {
 const CREATE_USER_EMAIL_SECURE_TOKEN = (payload: CREATE_USER_EMAIL_SECURE_TOKEN_PAYLOAD): Connection => {
   return {
     method: "POST",
-    endpoint: "/api/user-email-credentials",
+    endpoint: `${PrefixEndpoint.USER_EMAIL_CONFIG_KEY}`,
     payload: payload,
   };
 };

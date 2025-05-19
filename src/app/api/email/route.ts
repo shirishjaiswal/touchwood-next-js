@@ -1,6 +1,6 @@
 import { getUserEmail, getUserId } from "@/lib/session/session";
 import serverApiRequest from "@/utils/api/server-api-request";
-import GET_USER_EMAIL_SECURE_TOKEN from "@/utils/endpoints/external/email-secure-token/get-by-user-id";
+import GET_USER_EMAIL_SECURE_TOKEN from "@/utils/endpoints/external/email-secure-token/get";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
@@ -11,7 +11,8 @@ interface EmailRequestBody {
 }
 
 export async function POST(req: Request) {
-	const { recipients, subject, mailBody } = (await req.json()) as EmailRequestBody;
+	const { recipients, subject, mailBody } =
+		(await req.json()) as EmailRequestBody;
 
 	if (!recipients || !subject || !mailBody) {
 		return NextResponse.json(
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
 		);
 	}
 
-  const userId = await getUserId();
+	const userId = await getUserId();
 	const userMail = await getUserEmail();
 	const apiResponse = await serverApiRequest({
 		connection: GET_USER_EMAIL_SECURE_TOKEN(userId),
@@ -45,9 +46,9 @@ export async function POST(req: Request) {
 
 	const mailOptions = {
 		from: userMail,
-    sender: userMail,
+		sender: userMail,
 		to: recipients,
-    replyTo: recipients,
+		replyTo: recipients,
 		subject,
 		html: mailBody,
 	};

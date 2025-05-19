@@ -6,7 +6,6 @@ import { passwordSchema } from '@/lib/validations/password';
 // Login validation
 export const loginSchema = z.object({
   email: emailSchema,
-  password: passwordSchema,
 });
 
 // Register validation

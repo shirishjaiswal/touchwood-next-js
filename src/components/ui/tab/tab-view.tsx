@@ -1,10 +1,12 @@
-'use client';
-import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+"use client";
+
+import Link from "next/link";
+import { useEffect, useRef, useState, useMemo } from "react";
+import clsx from "clsx";
 
 export interface TabType {
   id: number;
-  key: string;
+  uniqueKey: string;
   label: string;
   description?: string;
   position: number;
@@ -12,65 +14,114 @@ export interface TabType {
 }
 
 export type TabComponentProps = {
-  tabList: TabType[];
+  tabData: TabType[];
   activeTab: number;
   onTabChange?: (tabId: number) => void;
   className?: string;
 };
 
-function TabView({ tabList, activeTab, onTabChange, className }: TabComponentProps) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+function TabView({
+  tabData,
+  activeTab,
+  onTabChange,
+  className = "",
+}: TabComponentProps) {
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+  const sortedTabs = useMemo(
+    () => [...tabData].sort((a, b) => a.position - b.position),
+    [tabData]
+  );
+
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
     <>
-      {/* Desktop Tab Navigation */}
-      <div role="tablist" className={`hidden sm:flex gap-4 border-b ${className}`}>
-        {tabList
-          .sort((a, b) => a.position - b.position)
-          .map((tab) => (
-            <button
+      <div
+        id="desktop-tabs"
+        role="tablist"
+        aria-orientation="horizontal"
+        className={clsx("hidden sm:flex gap-4 border-b", className)}
+      >
+        {sortedTabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <Link
               key={tab.id}
-              role="tab"
-              aria-selected={activeTab === tab.id}
+              href={tab.link}
               onClick={() => onTabChange?.(tab.id)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab.id
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-primary-500 hover:border-primary-300'
-              }`}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`tabpanel-${tab.id}`}
+              id={`tab-${tab.id}`}
+              className={clsx(
+                "px-4 py-2 text-base font-medium border-b-2 transition-colors",
+                {
+                  "border-primary-500 text-primary-600": isActive,
+                  "border-transparent text-gray-500 hover:text-primary-500 hover:border-primary-300":
+                    !isActive,
+                }
+              )}
             >
-              <Link className='no-underline text-base' href={tab.link}>{tab.label}</Link>
-            </button>
-          ))}
+              {tab.label}
+            </Link>
+          );
+        })}
       </div>
 
       {/* Mobile Dropdown */}
-      <div className={`relative sm:hidden m-3 ${className}`} ref={dropdownRef}>
+      <div
+        id="mobile-dropdown"
+        className={clsx("relative sm:hidden", className)}
+        ref={dropdownRef}
+      >
         <button
-          onClick={() => setIsDropdownOpen((prev) => !prev)}
+          type="button"
+          onClick={() => setDropdownOpen((prev) => !prev)}
           className="w-full flex justify-between items-center border border-gray-300 bg-white shadow-md rounded-lg p-3 text-gray-700 font-bold"
+          aria-haspopup="listbox"
+          aria-expanded={isDropdownOpen}
         >
-          {tabList.find((tab) => tab.id === activeTab)?.label || 'Select Tab'}
-          <span className="text-lg">&#9662;</span>
+          {tabData.find((tab) => tab.id === activeTab)?.label || "Select Tab"}
+          <span className="ml-2 text-lg">&#9662;</span>
         </button>
 
         {isDropdownOpen && (
-          <ul className="absolute left-0 w-full bg-white border border-gray-300 shadow-lg rounded-md mt-2 z-10">
-            {tabList.map((tab) => (
-              <li key={tab.id} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                <Link href={tab.link} onClick={() => setIsDropdownOpen(false)}>
+          <ul
+            role="listbox"
+            aria-activedescendant={`tab-${activeTab}`}
+            className="absolute left-0 w-full bg-white border border-gray-300 shadow-lg rounded-md mt-2 z-10"
+          >
+            {sortedTabs.map((tab) => (
+              <li
+                key={tab.id}
+                role="option"
+                aria-selected={activeTab === tab.id}
+                className={clsx({
+                  "font-bold text-primary bg-accent-400": activeTab === tab.id,
+                })}
+              >
+                <Link
+                  href={tab.link}
+                  onClick={() => {
+                    onTabChange?.(tab.id);
+                    setDropdownOpen(false);
+                  }}
+                  className="block w-full px-4 py-2 hover:bg-gray-100"
+                >
                   {tab.label}
                 </Link>
               </li>

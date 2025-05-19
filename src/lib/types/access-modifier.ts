@@ -1,10 +1,9 @@
 type AccessModifier = {
 	id: number;
 	value: string;
-	role: {
+	accountRole: {
 		id: number;
 		value: string;
-		priority: number;
 	};
 };
 

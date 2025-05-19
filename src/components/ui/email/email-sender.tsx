@@ -42,7 +42,7 @@ function EmailSender({ privateTokenPresent, emailTemplate }: EmailSenderProps) {
 	const [errors, setErrors] = useState<{ [key: string]: string }>({});
 	const [isUserEmailConfigured] =
 		useState(privateTokenPresent);
-	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [_, setIsLoading] = useState<boolean>(false);
 
 	useEffect(() => {
 		const newTemplate = emailTemplate?.body || "";

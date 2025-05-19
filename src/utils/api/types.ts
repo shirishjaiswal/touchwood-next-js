@@ -21,4 +21,5 @@ export type RequestOptions = {
 export type Response = {
   data: any | null;
   error: any | null;
+  status: number | null;
 };

@@ -1,12 +1,12 @@
 import serverApiRequest from "@/utils/api/server-api-request";
-import GET_EMAIL_TEMPLATE_BY_LABEL from "@/utils/endpoints/external/email-templates/get-by-label";
+import GET_EMAIL_TEMPLATE_BY_LABEL from "@/utils/endpoints/external/email-template/get-by-label";
 import {
 	addLinkToTemplate,
 	addUserNameToTemplate,
 } from "@/lib/email/add-link-to-template";
 import { sendEmail } from "@/lib/email/send-email";
 import GENERATE_NEW_TOKEN from "@/utils/endpoints/external/token/generate-new";
-import GET_USER_EMAIL_SECURE_TOKEN from "@/utils/endpoints/external/email-secure-token/get-by-user-id";
+import GET_USER_EMAIL_SECURE_TOKEN from "@/utils/endpoints/external/email-secure-token/get";
 import { getUserEmail, getUserId } from "../session/session";
 
 function sendMailViaTouchwood(to: string, subject: string, template: string) {

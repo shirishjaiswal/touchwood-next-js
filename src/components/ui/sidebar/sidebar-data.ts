@@ -1,4 +1,4 @@
-import { Home, Settings, User, Arrow, Logout, Configuration, Chat } from '@/components/ui/icons';
+import { Home, Settings, User, Logout, Configuration, Chat } from '@/components/ui/icons';
 import axios from 'axios';
 
 export interface Item {
@@ -23,13 +23,15 @@ export const menuItems: MenuItem[] = [
     id: 1,
     title: 'Dashboard',
     icon: Home,
-    role: ['admin']
+    role: ['admin'],
+    redirect: '/home/dashboard',
   },
   {
     id: 2,
     title: 'Dashboard',
     icon: Home,
-    role: ['user']
+    role: ['user'],
+    redirect: '/admin/dashboard',
   },
   {
     id: 3,
@@ -38,9 +40,10 @@ export const menuItems: MenuItem[] = [
     submenu: [
       { id: 21, title: 'Profile',role: ['admin', 'user'], redirect: '/home/configuration/profile/edit', },
       { id: 22, title: 'Email', role: ['admin', 'user'], redirect: '/home/configuration/email-template' },
+      { id: 23, title: 'Profile',role: ['admin'], redirect: '/admin/configuration/profile/edit', },
     ],
-  
-    role: ['admin', 'user']
+    role: ['admin', 'user'],
+    redirect: ""
   },
   {
     id: 4,
@@ -53,7 +56,6 @@ export const menuItems: MenuItem[] = [
   
     role: ['admin']
   },
-  { id: 5, title: 'Reports', icon: Arrow, chip: 'New', role: ['admin'] },
   {
     id: 6,
     title: 'Settings',
@@ -62,19 +64,7 @@ export const menuItems: MenuItem[] = [
       { id: 61, title: 'Profile', role: ['admin'] },
       { id: 62, title: 'Preferences', role: ['admin'] },
     ],
-  
     role: ['admin']
-  },
-  {
-    id: 7,
-    title: 'Account',
-    icon: User,
-    submenu: [
-      { id: 72, title: 'Mail', redirect: '/home/account/mail', role: ['admin', 'user'] },
-      { id: 71, title: 'Email Configuration', redirect: '/home/account/email-config', role: ['admin', 'user'] },
-    ],
-  
-    role: ['user', 'admin']
   },
   {
     id: 8,
@@ -85,6 +75,17 @@ export const menuItems: MenuItem[] = [
       { id: 81, title: 'AI Chat', redirect: '/home/chat/ai-chat', role: ['admin', 'user'] },
     ],
     role: ['admin', 'user']
+  },
+  {
+    id: 9,
+    title: 'Account',
+    icon: User,
+    submenu: [
+      { id: 91, title: 'Mail', redirect: '/home/account/mail', role: ['admin', 'user'] },
+      { id: 92, title: 'Email Configuration', redirect: '/home/account/email-config', role: ['admin', 'user'] },
+      { id: 93, title: 'Settings', redirect: '/home/account/settings/personal', role: ['admin', 'user'] },
+    ],
+    role: ['user', 'admin']
   },
   {
     id: 100,

@@ -2,7 +2,6 @@
 
 import api from '@/utils/api/axios-instance';
 import { cookies } from 'next/headers';
-import konsole from '@/utils/logging/konsole';
 import { validateToken } from '@/lib/session/session';
 import { Headers, RequestOptions, Response } from '@/utils/api/types';
 
@@ -45,13 +44,6 @@ const serverApiRequest = async ({
     // check for token
     if (token) finalHeaders['Authorization'] = `Bearer ${token}`;
 
-    konsole.log('🔍 API Request Config:', {
-      method: connection.method,
-      url: SERVER_ENDPOINT,
-      headers: finalHeaders,
-      data: connection.payload ?? undefined,
-    });
-
     // sing the centralized Axios instance `api`
     const response = await api.request({
       method: connection.method,
@@ -60,13 +52,14 @@ const serverApiRequest = async ({
       data: connection.payload ?? undefined,
     });
 
-    return { data: response.data ?? null, error: null };
+    return { data: response.data ?? null, error: null, status: response.status };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return {
       data: null,
       error:
-        error?.response?.data?.message || error?.message || 'Request failed',
+        error.response?.data.message || error.message || 'Request failed',
+      status: error?.response?.status,
     };
   }
 };

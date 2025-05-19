@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import serverApiRequest from "@/utils/api/server-api-request";
 import { emailSchema } from "@/lib/validations/email";
-import GET_USER_ACCOUNT_BY_EMAIL from "@/utils/endpoints/external/account-holder/get-by-email";
-import { sendVerificationEmail } from "@/lib/email/generate-token-send-mail";
+import REQUEST_EMAIL_VERIFICATION from "@/utils/endpoints/external/account/request-email-verification";
 
 export async function POST(request: Request) {
 	try {
@@ -20,21 +19,14 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: errorMessage }, { status: 400 });
 		}
 
-		// Handle email verification request
 		const email = verifyAccount as string;
 		const apiResponseGetAccount = await serverApiRequest({
-			connection: GET_USER_ACCOUNT_BY_EMAIL(email),
+			connection: REQUEST_EMAIL_VERIFICATION(email),
 		});
 
 		if (!apiResponseGetAccount?.data) {
 			return NextResponse.json({ error: "Email not found" }, { status: 404 });
 		}
-
-		await sendVerificationEmail(
-			apiResponseGetAccount.data.email,
-			apiResponseGetAccount.data.firstName,
-			apiResponseGetAccount.data.lastName
-		);
 
 		return NextResponse.json(
 			{ message: "Verification email sent!" },

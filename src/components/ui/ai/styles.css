@@ -1,20 +1,66 @@
 @import "../../../app/globals.css";
 
-.shadow {
-  @apply drop-shadow-2xl shadow-2xl shadow-primary;
-}
-
-#live-chat-button {
-  @apply fixed bottom-6 right-6 p-4;
-  @apply flex items-center justify-center rounded-full;
-  @apply bg-neutral-600 hover:bg-accent-900 text-white;
-}
-
+/* Ultra-modern Tailwind CSS styling for AiHelpBox with refined neumorphism and vibrant gradients */
 #ai-help-box-container {
-  @apply transition duration-300 ease-in-out;
+  @apply relative bg-gradient-to-br from-gray-950/95 to-blue-900/95 backdrop-blur-3xl border border-blue-600/40 rounded-tl-xl rounded-tr-3xl rounded-br-3xl rounded-bl-3xl p-3 overflow-y-auto transition-all duration-500 ease-out hover:shadow-[0_12px_48px_rgba(0,0,0,0.5)];
+}
 
-  #chat-form {
-    @apply flex items-center bg-white drop-shadow-2xl shadow-2xl rounded-lg p-0.5 ;
-    
+#ai-help-box-container footer {
+  @apply flex items-center gap-4;
+}
+
+#chat-form {
+  @apply flex w-full items-center gap-4;
+}
+
+#chat-message {
+  @apply bg-gray-900/60 text-white placeholder-gray-400/60 focus:ring-2 focus:ring-purple-600 focus:bg-gray-900/80 transition-all duration-300 rounded-2xl py-3 px-3 text-base border border-gray-800/50 shadow-inner focus:shadow-[0_0_10px_rgba(147,51,234,0.3)];
+}
+
+#send-chat {
+  @apply p-3 rounded-full bg-gradient-to-r from-purple-700 to-blue-700 text-white hover:from-purple-800 hover:to-blue-800 transition-all duration-300 hover:scale-110 active:scale-95 shadow-lg hover:shadow-[0_4px_15px_rgba(147,51,234,0.5)];
+}
+
+#send-chat:disabled {
+  @apply opacity-20 cursor-not-allowed hover:scale-100 hover:shadow-lg;
+}
+
+#close-chat {
+  @apply p-2 rounded-full bg-gray-900/90 hover:bg-gray-950/90 transition-all duration-300 hover:scale-110 active:scale-95 border border-gray-800/60 shadow-md hover:shadow-[0_2px_10px_rgba(0,0,0,0.5)];
+}
+
+button[aria-label="ai-help-button"] {
+  @apply p-4 rounded-full bg-gradient-to-r text-white shadow-[0_6px_20px_rgba(147,51,234,0.6)] hover:shadow-[0_8px_25px_rgba(147,51,234,0.8)] transition-all duration-300 hover:scale-110 active:scale-95;
+}
+
+/* Sleek scrollbar styling */
+#ai-help-box-container::-webkit-scrollbar {
+  @apply w-1.5;
+}
+
+#ai-help-box-container::-webkit-scrollbar-track {
+  @apply bg-gray-950/60 rounded-full;
+}
+
+#ai-help-box-container::-webkit-scrollbar-thumb {
+  @apply bg-purple-600/80 rounded-full hover:bg-purple-600 transition-all duration-300;
+}
+
+/* Responsive adjustments for mobile-first design */
+@media (max-width: 640px) {
+  #ai-help-box-container {
+    @apply rounded-tl-xl rounded-tr-2xl rounded-br-2xl rounded-bl-2xl p-4;
+  }
+  
+  #chat-message {
+    @apply py-2.5 px-5 text-sm rounded-xl;
+  }
+  
+  #send-chat {
+    @apply p-2.5;
+  }
+  
+  button[aria-label="ai-help-button"] {
+    @apply p-3;
   }
 }

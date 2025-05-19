@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
-import Select, { MultiValue, SingleValue, Props } from "react-select";
-import { BaseFieldProps, EventInterface } from "../type";
-import { ReactSelectOption } from "./types";
-import { getEventFormat } from "../helper";
-import { reactSelectStyles } from "./styles";
+import { useEffect, useState } from "react";
+
+import Select, { MultiValue, Props, SingleValue, StylesConfig } from "react-select";
+
+import { getEventFormat } from "@/components/ui/helper";
+import { ReactSelectOption } from "@/components/ui/dropdown/types";
+import { reactSelectStyles } from "@/components/ui/dropdown/styles";
+import { BaseFieldProps, EventInterface } from "@/components/ui/type";
 
 export interface SelectableDropdownOnChangeEvent extends EventInterface {
   target: {
@@ -18,6 +20,7 @@ export interface SelectableDropdownProps extends BaseFieldProps {
   onChange: (event: SelectableDropdownOnChangeEvent) => void;
   customComponents?: Partial<Props<ReactSelectOption>["components"]>;
   selectedValues?: ReactSelectOption[];
+  reactSelectStyle?: StylesConfig<ReactSelectOption, boolean>;
 }
 
 const SelectableDropdown: React.FC<SelectableDropdownProps> = ({
@@ -35,7 +38,8 @@ const SelectableDropdown: React.FC<SelectableDropdownProps> = ({
   labelStyles,
   descriptionStyles,
   errorStyles,
-  selectedValues, // ✅
+  reactSelectStyle,
+  selectedValues,
 }) => {
   const [dropOptions, setDropOptions] = useState<ReactSelectOption[]>(options);
   const [selectedOptions, setSelectedOptions] = useState<ReactSelectOption[]>([]);
@@ -55,17 +59,14 @@ const SelectableDropdown: React.FC<SelectableDropdownProps> = ({
     newValue: MultiValue<ReactSelectOption> | SingleValue<ReactSelectOption>,
   ) => {
     const selected = (Array.isArray(newValue) ? newValue : newValue ? [newValue] : []) as ReactSelectOption[];
-
     setSelectedOptions(selected);
-
     const updatedOptions = dropOptions.map((item) => ({
       ...item,
       isSelected: selected.some((selectedItem) => selectedItem.value === item.value),
     }));
-
     setDropOptions(updatedOptions);
-
-    const event = getEventFormat(selected, getError()) as SelectableDropdownOnChangeEvent;
+    const updatededSelected = updatedOptions.filter((option) => option.isSelected);
+    const event = getEventFormat(updatededSelected, getError()) as SelectableDropdownOnChangeEvent;
     onChange(event);
   };
 
@@ -96,9 +97,9 @@ const SelectableDropdown: React.FC<SelectableDropdownProps> = ({
           isDisabled={disabled}
           isMulti={isMultiSelect}
           placeholder={isMultiSelect ? "Select Options" : "Select Option"}
-          styles={reactSelectStyles}
+          styles={ reactSelectStyle ?? reactSelectStyles}
           options={dropOptions ?? []}
-          value={selectedValues ?? selectedOptions} // ✅ controlled or internal state
+          value={selectedValues ?? selectedOptions}
           onChange={handleChange}
           menuPlacement="auto"
           components={customComponents}

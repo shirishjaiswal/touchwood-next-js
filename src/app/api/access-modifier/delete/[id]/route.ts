@@ -1,5 +1,5 @@
 import serverApiRequest from "@/utils/api/server-api-request";
-import DELETE_ACCESS_MODIFIER_BY_ID from "@/utils/endpoints/external/access-modifier/delete";
+import DELETE_ACCESS_MODIFIER_BY_ID from "@/utils/endpoints/external/data-access-modifier/delete";
 import { NextResponse } from "next/server";
 
 export async function DELETE(
@@ -10,7 +10,7 @@ export async function DELETE(
 		const { id } = await params;
 
 		const apiResponse = await serverApiRequest({
-			connection: DELETE_ACCESS_MODIFIER_BY_ID( +id ),
+			connection: DELETE_ACCESS_MODIFIER_BY_ID(+id),
 		});
 
 		if (apiResponse?.error) {

@@ -1,4 +1,4 @@
-import "./globals.css";
+import "@/app/globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
@@ -7,7 +7,7 @@ import { LoaderSpin } from "@/components/ui/loader";
 import { Toaster } from "sonner";
 import { getUserEmail } from "@/lib/session/session";
 import serverApiRequest from "@/utils/api/server-api-request";
-import GET_USER_ACCOUNT_BY_EMAIL from "@/utils/endpoints/external/account-holder/get-by-email";
+import GET_USER_ACCOUNT_BY_EMAIL from "@/utils/endpoints/external/user/get-by-email";
 import { AuthProvider, AuthUser } from "@/utils/context/AuthContext";
 import { GlobalLoadingProvider } from "@/components/ui/loader/global-loading-provider";
 

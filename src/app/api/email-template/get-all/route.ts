@@ -1,5 +1,5 @@
 import serverApiRequest from "@/utils/api/server-api-request";
-import GET_ALL_EMAIL_TEMPLATE from "@/utils/endpoints/external/email-templates/get-all";
+import GET_ALL_EMAIL_TEMPLATE from "@/utils/endpoints/external/email-template/get-all";
 import { NextResponse } from "next/server";
 
 // GET /api/config-emails

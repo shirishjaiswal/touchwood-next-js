@@ -3,7 +3,7 @@ import { loginSchema } from "@/app/api/auth/validation";
 import serverApiRequest from "@/utils/api/server-api-request";
 import LOGIN_ENDPOINT, {
 	LOGIN_PAYLOAD_TYPE,
-} from "@/utils/endpoints/external/auth/login";
+} from "@/utils/endpoints/external/account/login";
 import { createSession } from "@/lib/session/session";
 import { hashPassword } from "@/lib/validations/hashPassword";
 
@@ -27,7 +27,8 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const { email, password } = validationResult.data;
+		const { email } = validationResult.data;
+		const password = body.password;
 		const encryptedPassword = await hashPassword(password);
 		const loginPayload: LOGIN_PAYLOAD_TYPE = {
 			email,
@@ -39,6 +40,39 @@ export async function POST(request: Request) {
 			connection: LOGIN_ENDPOINT(loginPayload),
 		});
 
+		if (loginResponse?.status === 403) {
+			return NextResponse.json(
+				{
+					error: "Invalid credentials",
+				},
+				{
+					status: 403,
+					statusText: "Forbidden",
+				}
+			);
+		}
+		if (loginResponse?.status === 404) {
+			return NextResponse.json(
+				{
+					error: "User not found",
+				},
+				{
+					status: 404,
+					statusText: "Not Found",
+				}
+			);
+		}
+		if (loginResponse?.status === 401) {
+			return NextResponse.json(
+				{
+					error: "Email not verified",
+				},
+				{
+					status: 401,
+					statusText: "Unauthorized",
+				}
+			);
+		}
 		if (loginResponse?.error) {
 			return NextResponse.json(
 				{
@@ -50,15 +84,15 @@ export async function POST(request: Request) {
 				}
 			);
 		}
+		const {id, accountRoles} = loginResponse.data;
 
-		const { id: userId, email: userEmail, roles } = loginResponse.data;
-		const roleValues = roles.map(
+		const roleValues = accountRoles.map(
 			(role: { id: number; value: string }) => role.value
 		);
 
-		await createSession(userId, userEmail, roleValues);
+		await createSession(id, email, roleValues);
 
-		return NextResponse.redirect(new URL("/", requestUrl));
+		return NextResponse.redirect(new URL("/home/dashboard", requestUrl));
 	} catch (error) {
 		const errorMessage =
 			error instanceof Error ? error.message : "An unknown error occurred";

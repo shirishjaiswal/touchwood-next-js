@@ -1,6 +1,7 @@
 "use client";
 
 import ClickButton from "@/components/ui/button/click-button";
+import { ArrowLeftIcon, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -13,9 +14,11 @@ interface PaginationProps {
 function Pagination({ currentPage, totalPages, path }: PaginationProps) {
 	const [pageNumbers, setPageNumbers] = useState<number[]>([]);
 	const router = useRouter();
+
 	const handlePageChange = (page: number) => {
-		router.push(`/home/chat/mail/${path}/${page-1}`);
+		router.push(`/home/chat/mail/${path}/${page - 1}`);
 	};
+
 	useEffect(() => {
 		const pages = [];
 		for (let i = 1; i <= totalPages; i++) {
@@ -23,26 +26,31 @@ function Pagination({ currentPage, totalPages, path }: PaginationProps) {
 		}
 		setPageNumbers(pages);
 	}, [totalPages]);
+
 	return (
-		<div className="my-6 flex justify-start w-10/12">
-			<div className="flex items-center gap-2">
+		<div className="flex py-4 w-full">
+			<div className="flex items-center gap-2 px-4 py-2">
 				<ClickButton
-          id="previous-page-button"
-					variant="shadow-default"
+					id="previous-page-button"
+					variant="outline-default"
 					size="xs"
 					disabled={currentPage === 0}
+					onClick={() => currentPage > 0 && handlePageChange(currentPage)}
+					className="disabled:opacity-50 disabled:cursor-not-allowed border-none"
 				>
-					<span>Previous</span>
+					<ArrowLeftIcon />
 				</ClickButton>
 
 				{pageNumbers.map((page) => (
 					<ClickButton
-            id={`page-button-${page}`}
+						id={`page-button-${page}`}
 						key={page}
-						variant={page === currentPage +1 ? "shadow-green" : "outline-default"}
+						variant={page === currentPage + 1 ? "shadow-green" : "outline-default"}
 						size="xs"
-						className={`min-w-[2.5rem] justify-center ${
-							page === currentPage+1 ? "text-white" : ""
+						className={`min-w-[2.5rem] justify-center rounded-md transition-all duration-200 ${
+							page === currentPage + 1
+								? "text-white bg-green-600 hover:bg-green-700"
+								: "hover:bg-gray-100"
 						}`}
 						onClick={() => handlePageChange(page)}
 					>
@@ -51,12 +59,14 @@ function Pagination({ currentPage, totalPages, path }: PaginationProps) {
 				))}
 
 				<ClickButton
-          id="next-page-button"
-					variant="shadow-default"
+					id="next-page-button"
+					variant="outline-default"
 					size="xs"
-					disabled={currentPage === totalPages}
+					disabled={currentPage + 1 === totalPages}
+					onClick={() => currentPage + 1 < totalPages && handlePageChange(currentPage + 2)}
+					className="disabled:opacity-50 disabled:cursor-not-allowed border-none "
 				>
-					<span>Next</span>
+					<ArrowRight />
 				</ClickButton>
 			</div>
 		</div>

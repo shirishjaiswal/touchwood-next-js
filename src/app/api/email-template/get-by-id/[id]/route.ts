@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import serverApiRequest from "@/utils/api/server-api-request";
 import GET_EMAIL_TEMPLATE_BY_ID, {
 	GET_EMAIL_TEMPLATE_BY_ID_PAYLOAD,
-} from "@/utils/endpoints/external/email-templates/get-by-id";
+} from "@/utils/endpoints/external/email-template/get-by-id";
 
 export async function GET(
 	request: Request,
@@ -12,7 +12,10 @@ export async function GET(
 		const emailTemplateId = Number(params.id);
 
 		if (isNaN(emailTemplateId)) {
-			return NextResponse.json({ error: "Invalid email template ID" }, { status: 400 });
+			return NextResponse.json(
+				{ error: "Invalid email template ID" },
+				{ status: 400 }
+			);
 		}
 
 		const payload: GET_EMAIL_TEMPLATE_BY_ID_PAYLOAD = { id: emailTemplateId };

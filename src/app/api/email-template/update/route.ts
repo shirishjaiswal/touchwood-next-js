@@ -3,8 +3,8 @@ import { checkAndValidateText } from "@/lib/validations/text";
 import serverApiRequest from "@/utils/api/server-api-request";
 import UPDATE_EMAIL_TEMPLATE, {
 	UPDATE_EMAIL_TEMPLATE_PAYLOAD,
-} from "@/utils/endpoints/external/email-templates/update";
-import validateEmailTemplateCreationPermission from "@/utils/helper/internal-apis/validate-template-creation";
+} from "@/utils/endpoints/external/email-template/update";
+import validateEmailTemplateWritePermission from "@/utils/helper/internal-apis/validate-template-creation";
 import { NextResponse } from "next/server";
 
 export async function PUT(request: Request) {
@@ -39,7 +39,7 @@ export async function PUT(request: Request) {
 		const currentUserId = await getUserId();
 
 		const hasPermissionToUpdate =
-			await validateEmailTemplateCreationPermission(accessModifierId);
+			await validateEmailTemplateWritePermission(accessModifierId);
 		if (!hasPermissionToUpdate) {
 			return NextResponse.json(
 				{

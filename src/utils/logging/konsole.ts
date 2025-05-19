@@ -1,4 +1,4 @@
-const log = (...args: unknown[]) => {
+const log = () => {
   if (process.env.NEXT_PUBLIC_NODE_ENV?.toLowerCase() === "development") {
   }
 };

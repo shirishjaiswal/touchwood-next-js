@@ -43,7 +43,6 @@ export async function POST(request: Request) {
       messages: builtMessages,
       temperature: 0.7,
     });
-    konsole.log("Built messages:", builtMessages);
     return (await stream).toDataStreamResponse();
   } catch (error) {
     console.error("Error:", error);

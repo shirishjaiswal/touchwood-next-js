@@ -124,7 +124,7 @@ export const styleForTags: StylesConfig<ReactSelectOption, boolean> = {
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-start",
-    fontSize: "12px",
+    fontSize: "14px",
     lineHeight: "1.2",
     "&:hover": {
       borderColor: "#3B82F6",

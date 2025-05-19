@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import EmailCodeViewer from "@/app/home/chat/mail/mail-template/[id]/components/email-code-viewer";
-import EmailEditor from "@/app/home/chat/mail/mail-template/[id]/components/email-editor";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import axios, { AxiosError } from "axios";
-import ClickButton from "@/components/ui/button/click-button";
-import FieldInput from "@/components/ui/input/field-input";
-import { inputStyles } from "@/app/auth/login/components/form-container";
-import Save from "@/components/ui/icons/action/save";
-import { Edit } from "@/components/ui/icons";
-import AccessModifier from "@/lib/types/access-modifier";
 
-export type EmailTemplateType = {
+import { toast } from "sonner";
+import axios, { AxiosError } from "axios";
+
+import { useRouter } from "next/navigation";
+import { Edit } from "@/components/ui/icons";
+import SaveIcon from "@/components/ui/icons/action/save";
+import AccessModifier from "@/lib/types/access-modifier";
+import FieldInput from "@/components/ui/input/field-input";
+import ClickButton from "@/components/ui/button/click-button";
+import { inputStyles } from "@/app/auth/login/components/form-container";
+import EmailEditor from "@/app/home/chat/mail/mail-template/[id]/components/email-editor";
+import EmailCodeViewer from "@/app/home/chat/mail/mail-template/[id]/components/email-code-viewer";
+
+export type EmailTemplate = {
 	id: number;
 	label: string;
 	subject: string;
@@ -22,119 +24,105 @@ export type EmailTemplateType = {
 	accessModifierId: number;
 };
 
-interface CreateEmailTemplateProps {
-	emailTemplate: EmailTemplateType | null;
+interface EmailTemplateProps {
+	emailTemplate: EmailTemplate | null;
 	accessModifiers: AccessModifier[];
 }
 
-function CreateAndEditEmailTemplate({
+const CreateOrEditEmailTemplate = ({
 	emailTemplate,
 	accessModifiers,
-}: CreateEmailTemplateProps) {
-	const [emailCode, setEmailCode] = useState<string>(emailTemplate?.body || "");
-	const [emailCodeForView, setEmailCodeForView] = useState(
-		emailTemplate?.body || ""
-	);
-	const [label, setLabel] = useState<string>(emailTemplate?.label || "");
-	const [showView, setShowView] = useState<"code" | "view">("code");
-	const [mailSubject, setMailSubject] = useState<string>(
-		emailTemplate?.subject || ""
-	);
+}: EmailTemplateProps) => {
+	const [emailBody, setEmailBody] = useState<string>(emailTemplate?.body || "");
+	const [viewedEmailBody, setViewedEmailBody] = useState<string>(emailTemplate?.body || "");
+	const [templateLabel, setTemplateLabel] = useState<string>(emailTemplate?.label || "");
+	const [currentView, setCurrentView] = useState<"code" | "view">("code");
+	const [emailSubject, setEmailSubject] = useState<string>(emailTemplate?.subject || "");
 	const [accessModifierId, setAccessModifierId] = useState<number>(
-		emailTemplate?.accessModifierId ||
-			accessModifiers?.find(
-				(accessModifier) => accessModifier.value === "Private"
-			)?.id ||
-			0
+		emailTemplate?.accessModifierId || accessModifiers?.find((mod) => mod.value === "Private")?.id || 0
 	);
 	const [isEditMode, setIsEditMode] = useState<boolean>(false);
-	const [isSubmitting, setSubmitting] = useState<boolean>(false);
+	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 	const router = useRouter();
 
 	useEffect(() => {
-		const newTemplate = emailTemplate?.body || "";
-		const newSubject = emailTemplate?.subject || "";
-		setEmailCode(newTemplate);
-		setEmailCodeForView(newTemplate);
-		setMailSubject(newSubject);
-		setLabel(emailTemplate?.label || "");
-		setIsEditMode(emailTemplate?.label ? false : true);
+		if (emailTemplate) {
+			setEmailBody(emailTemplate.body);
+			setViewedEmailBody(emailTemplate.body);
+			setEmailSubject(emailTemplate.subject);
+			setTemplateLabel(emailTemplate.label);
+			setIsEditMode(false);
+		} else {
+			setIsEditMode(true);
+		}
 	}, [emailTemplate]);
 
-	const handleMailCodeChange = (data: string) => setEmailCode(data);
+	const handleEmailBodyChange = (newBody: string) => setEmailBody(newBody);
+	const handleSubjectChange = (newSubject: string) => setEmailSubject(newSubject);
+	const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => setTemplateLabel(e.target.value);
 
-	const handleSubjectChange = (data: string) => setMailSubject(data);
+	const toggleEditMode = () => setIsEditMode((prev) => !prev);
 
-	const handleSetLabel = (e: React.ChangeEvent<HTMLInputElement>) => {
-		if (e.target.value) {
-			setLabel(e.target.value);
-		}
-	};
 	const handleRunTemplate = () => {
-		setShowView("view");
-		setEmailCodeForView(emailCode);
+		setCurrentView("view");
+		setViewedEmailBody(emailBody);
 	};
 
-	const handleValidation = () => {
-		if (!label) {
+	const validateFields = (): boolean => {
+		if (!templateLabel) {
 			toast.error("Template label is required");
 			setIsEditMode(true);
 			return false;
 		}
-		if (!mailSubject) {
+		if (!emailSubject) {
 			toast.error("Email subject is required");
 			return false;
 		}
-		if (!emailCode) {
-			toast.error("Email template code is required");
+		if (!emailBody) {
+			toast.error("Email body is required");
 			return false;
 		}
 		return true;
 	};
 
-	const handleUpdate = async () => {
-		if (!emailTemplate?.id) return;
-		if (!handleValidation()) return;
+	const handleUpdateTemplate = async () => {
+		if (!emailTemplate?.id || !validateFields()) return;
+
 		try {
 			await axios.put(
 				"/api/email-template/update",
 				{
 					id: emailTemplate.id,
-					label: emailTemplate.label,
-					subject: mailSubject,
-					body: emailCode,
-					accessModifierId: accessModifierId,
+					label: templateLabel,
+					subject: emailSubject,
+					body: emailBody,
+					accessModifierId,
 				},
 				{
-					headers: {
-						"Content-Type": "application/json",
-					},
+					headers: { "Content-Type": "application/json" },
 				}
 			);
-
 			toast.success("Email template updated successfully");
 			router.push("/home/configuration/email-template");
 		} catch {
 			toast.error("Failed to update email template");
-		} finally {
 		}
 	};
 
-	const handleAddNewTemplate = async () => {
+	const handleCreateTemplate = async () => {
+		if (!validateFields()) return;
+
 		try {
-			if (!handleValidation()) return;
 			await axios.post(
 				"/api/email-template/create",
 				{
-					label: label,
-					subject: mailSubject,
-					body: emailCode,
-					accessModifierId: accessModifierId,
+					label: templateLabel,
+					subject: emailSubject,
+					body: emailBody,
+					accessModifierId,
 				},
 				{
-					headers: {
-						"Content-Type": "application/json",
-					},
+					headers: { "Content-Type": "application/json" },
 				}
 			);
 			toast.success("Email template created successfully");
@@ -144,78 +132,80 @@ function CreateAndEditEmailTemplate({
 				toast.error(error.response?.data.error);
 			}
 		} finally {
-			setSubmitting(false);
+			setIsSubmitting(false);
 		}
 	};
 
-	const handleSave = () => {
-		if (emailTemplate?.id) handleUpdate();
-		else handleAddNewTemplate();
+	const handleSaveTemplate = () => {
+		if (emailTemplate?.id) handleUpdateTemplate();
+		else handleCreateTemplate();
 	};
 
 	return (
-		<div onSubmit={handleSave} className="w-full flex flex-col gap-1">
+		<div className="w-full px-2 py-2 flex flex-col gap-4">
 			<div className="flex justify-between items-center">
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-4">
 					{isEditMode ? (
 						<FieldInput
+							data-testid="template-label"
 							id="template-label"
 							type="text"
-							value={label}
-							onChange={handleSetLabel}
+							value={templateLabel}
+							onChange={handleLabelChange}
 							placeholder="Template Label"
 							required
-							name={"template-label"}
-							aria-label={"template-label"}
-							data-testid={"template-label"}
-							mainContainerStyles="max-w-fit"
+							name="template-label"
+							aria-label="template-label"
+							mainContainerStyles="max-w-xs"
 							inputStyles={inputStyles}
 						/>
 					) : (
-						<h1 className="font-bold text-2xl uppercase">{label}</h1>
+						<h1 className="font-bold text-2xl uppercase">{templateLabel}</h1>
 					)}
 					<ClickButton
 						id="label-edit-button"
-						onClick={() => setIsEditMode(!isEditMode)}
+						onClick={toggleEditMode}
 						variant="none"
 						size="none"
 					>
-						{isEditMode ? <Save /> : <Edit />}
+						{isEditMode ? <SaveIcon /> : <Edit />}
 					</ClickButton>
 				</div>
 				<ClickButton
-					id="update-email"
+					id="save-email-template"
 					variant="shadow-default"
 					size="md"
-					className="md:w-fit flex m-1"
-					onClick={handleSave}
+					className="w-auto"
+					onClick={handleSaveTemplate}
 					disabled={isSubmitting}
 				>
-					<div className="flex gap-4">
-						<Save />
-						<p>{isSubmitting ? "Saving..." : "Save"}</p>
+					<div className="flex gap-2 items-center">
+						<SaveIcon />
+						<span>{isSubmitting ? "Saving..." : "Save"}</span>
 					</div>
 				</ClickButton>
 			</div>
-			<div className="w-full bg-gray-50 min-h-[calc(100vh-180px)] grid grid-cols-1 md:grid-cols-2 gap-4">
+
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 				<EmailEditor
-					emailCode={emailCode}
-					mailSubject={mailSubject}
+					emailBody={emailBody}
+					emailSubject={emailSubject}
 					handleRun={handleRunTemplate}
 					handleSubjectChange={handleSubjectChange}
-					handleMailCodeChange={handleMailCodeChange}
-					showView={showView}
+					handleBodyChange={handleEmailBodyChange}
+					currentView={currentView}
 					accessModifierId={accessModifierId}
 					setAccessModifierId={setAccessModifierId}
 					accessModifiers={accessModifiers}
 				/>
 				<EmailCodeViewer
-					emailCode={emailCodeForView}
-					showView={showView}
-					setShowView={setShowView}
+					emailBody={viewedEmailBody}
+					currentView={currentView}
+					setCurrentView={setCurrentView}
 				/>
 			</div>
 		</div>
 	);
-}
-export default CreateAndEditEmailTemplate;
+};
+
+export default CreateOrEditEmailTemplate;

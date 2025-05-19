@@ -60,7 +60,7 @@ const Toggle: React.FC<ToggleProps> = ({
         <ClickButton
           id="toggle-button"
           variant="none"
-          className={`relative min-w-12 h-6 rounded-l-3xl rounded-r-3xl cursor-pointer transition-colors border border-primary ${
+          className={`relative min-w-12.5 h-6.5 rounded-l-3xl rounded-r-3xl cursor-pointer transition-colors border border-primary p-3 ${
             isChecked ? 'bg-primary-500' : 'bg-gray-300'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={handleToggle}

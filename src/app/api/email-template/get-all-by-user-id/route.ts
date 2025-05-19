@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import serverApiRequest from "@/utils/api/server-api-request";
-import GET_ALL_EMAIL_TEMPLATE_BY_USER_ID from "@/utils/endpoints/external/email-templates/get-by-user-id";
+import GET_ALL_EMAIL_TEMPLATE_BY_USER_ID from "@/utils/endpoints/external/email-template/get-by-user-id";
 import { getUserId } from "@/lib/session/session";
 
 export async function GET(request: Request) {

@@ -40,7 +40,7 @@ export const ModalBox: React.FC<ModalBoxProps> = ({
       />
       <dialog
         id="main-container"
-        className={`shadow-primary-500 fixed top-1/2 left-1/2 z-50 flex w-10/12 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-lg border border-neutral-400 p-2 shadow-xl sm:w-4/6 md:w-3/5 md:p-4 lg:w-2/4 xl:w-2/5 ${mainContainerStyle_mb}`}
+        className={`shadow-primary-500 fixed top-1/2 left-1/2 z-50 flex w-10/12 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-lg border border-neutral-400 p-3 shadow-xl sm:w-4/6 md:w-3/5 md:p-4 lg:w-2/4 xl:w-2/5 ${mainContainerStyle_mb}`}
       >
         <ClickButton
           id="close-button"

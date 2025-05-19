@@ -1,17 +1,19 @@
 'use client';
+
 import { useState } from 'react';
-import { MultiValue, SingleValue, Props, StylesConfig } from 'react-select';
-import dynamic from 'next/dynamic'; // Import dynamic from Next.js
-import { BaseFieldProps, EventInterface } from '@/components/ui/type';
-import { ReactSelectOption } from '@/components/ui/dropdown/types';
-import { generateUniqueKey } from '@/components/ui/dropdown/helper';
+
+import { ActionMeta } from 'react-select';
+import { MultiValue, Props, SingleValue, StylesConfig } from 'react-select';
+
+import dynamic from 'next/dynamic';
 import { getEventFormat } from '@/components/ui/helper';
 import { styleForTags } from '@/components/ui/dropdown/styles';
-import { ActionMeta } from 'react-select';
+import { ReactSelectOption } from '@/components/ui/dropdown/types';
+import { generateUniqueKey } from '@/components/ui/dropdown/helper';
+import { BaseFieldProps, EventInterface } from '@/components/ui/type';
 
-// Dynamically import CreatableSelect with SSR disabled
 const CreatableSelect = dynamic(() => import('react-select/creatable'), {
-  ssr: false, // Disable SSR for this component
+  ssr: false, 
 });
 
 export interface CreatableDropdownOnChangeEvent extends EventInterface {

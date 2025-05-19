@@ -1,6 +1,6 @@
 import NavBar from "@/components/ui/nav-bar/nav-bar";
-import Sidebar from "@/components/ui/sidebar/sidebar";
 import { getUserRoles } from "@/lib/session/session";
+import Sidebar from "@/components/ui/sidebar/sidebar";
 
 async function HomeLayout({ children }: { children: React.ReactNode }) {
 	const roles = await getUserRoles();

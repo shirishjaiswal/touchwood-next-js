@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import serverApiRequest from "@/utils/api/server-api-request";
-import GET_USER_EMAIL_SECURE_TOKEN from "@/utils/endpoints/external/email-secure-token/get-by-user-id";
+import GET_USER_EMAIL_SECURE_TOKEN from "@/utils/endpoints/external/email-secure-token/get";
 import { getUserId } from "@/lib/session/session";
 
-export async function GET(request: Request) {
+export async function GET() {
 	try {
 		const userId = await getUserId();
 		if (typeof userId !== "number" || isNaN(userId)) {

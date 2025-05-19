@@ -1,6 +1,6 @@
 import { getUserId } from "@/lib/session/session";
 import serverApiRequest from "@/utils/api/server-api-request";
-import DELETE_EMAIL_TEMPLATE_BY_ID from "@/utils/endpoints/external/email-templates/delete";
+import DELETE_EMAIL_TEMPLATE_BY_ID from "@/utils/endpoints/external/email-template/delete";
 import { NextResponse } from "next/server";
 
 export async function DELETE(
@@ -19,7 +19,10 @@ export async function DELETE(
 		}
 		const userId = await getUserId();
 		const deleteResponse = await serverApiRequest({
-			connection: DELETE_EMAIL_TEMPLATE_BY_ID({ templateId: templateId, userId: userId}),
+			connection: DELETE_EMAIL_TEMPLATE_BY_ID({
+				templateId: templateId,
+				userId: userId,
+			}),
 		});
 
 		if (deleteResponse?.error) {

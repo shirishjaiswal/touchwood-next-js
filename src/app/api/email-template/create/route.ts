@@ -2,21 +2,16 @@ import { NextResponse } from "next/server";
 import serverApiRequest from "@/utils/api/server-api-request";
 import CREATE_EMAIL_TEMPLATE, {
 	CREATE_EMAIL_TEMPLATE_PAYLOAD,
-} from "@/utils/endpoints/external/email-templates/create";
+} from "@/utils/endpoints/external/email-template/create";
 import { getUserId } from "@/lib/session/session";
 import { checkAndValidateText } from "@/lib/validations/text";
-import validateEmailTemplateCreationPermission from "@/utils/helper/internal-apis/validate-template-creation";
+import validateEmailTemplateWritePermission from "@/utils/helper/internal-apis/validate-template-creation";
 
 export async function POST(request: Request) {
 	try {
 		const requestBody = await request.json();
 
-		const {
-			label,
-			subject,
-			body,
-			accessModifierId,
-		} = requestBody;
+		const { label, subject, body, accessModifierId } = requestBody;
 
 		const isLabelValid = checkAndValidateText(label);
 		const isSubjectValid = checkAndValidateText(subject);
@@ -32,7 +27,7 @@ export async function POST(request: Request) {
 		const currentUserId = await getUserId();
 
 		const hasPermissionToCreate =
-			await validateEmailTemplateCreationPermission(accessModifierId);
+			await validateEmailTemplateWritePermission(accessModifierId);
 		if (!hasPermissionToCreate) {
 			return NextResponse.json(
 				{

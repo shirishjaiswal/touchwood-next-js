@@ -3,17 +3,16 @@ import serverApiRequest from "@/utils/api/server-api-request";
 import { registerSchema } from "@/lib/validations/register";
 import REGISTER, {
 	REGISTER_PAYLOAD_TYPE,
-} from "@/utils/endpoints/external/auth/register";
-import GET_USER_ACCOUNT_BY_EMAIL from "@/utils/endpoints/external/account-holder/get-by-email";
+} from "@/utils/endpoints/external/account/register";
+import GET_USER_ACCOUNT_BY_EMAIL from "@/utils/endpoints/external/user/get-by-email";
 import { hashPassword } from "@/lib/validations/hashPassword";
-import GET_ALL_ROLES from "@/utils/endpoints/external/role/get-all";
+import GET_ALL_ACCOUNT_ROLES from "@/utils/endpoints/external/account-role/get-all";
 
 export async function POST(request: Request) {
 	try {
 		// Get form data
 		const formData = await request.formData();
 		const body = Object.fromEntries(formData.entries());
-
 
 		// Validate data based on request type
 		const parsedData = registerSchema.safeParse(body);
@@ -62,15 +61,20 @@ export async function POST(request: Request) {
 		const hashedPassword = await hashPassword(password);
 
 		const { data: roles } = await serverApiRequest({
-			connection: GET_ALL_ROLES(),
+			connection: GET_ALL_ACCOUNT_ROLES(),
 		});
-		const userRole = roles.find((role: { value: string }) => role.value.toLowerCase() === "user");
+
+		const userRole = roles.find(
+			(role: { value: string }) => role.value.toLowerCase() === "user"
+		);
+
+		console.log(userRole);
 		const securedBody: REGISTER_PAYLOAD_TYPE = {
 			firstName,
 			lastName,
 			email,
 			password: hashedPassword,
-			roles: [userRole],
+			accountRoles: [userRole],
 		};
 
 		const apiResponse = await serverApiRequest({

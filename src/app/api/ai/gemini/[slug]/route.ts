@@ -58,7 +58,7 @@ export async function POST(
 				id: generateId(),
 				role: "user",
 				content:
-					"Write a short email return only the email only html code. GuideLine : If asked anything other than generating email html template with css then reply with error message",
+					"Generate a clean, responsive, and well-structured HTML template for [type of content: e.g., email, resume, portfolio, etc.]. Use semantic HTML5 elements and inline CSS where necessary to ensure compatibility with all major email clients and browsers. Leave placeholders for dynamic content (e.g., {{Name}}, {{Email}}, {{CTA_Link}}). Avoid external dependencies like JavaScript or web fonts. The layout should be professional, accessible, and mobile-friendly. Return only the full HTML code without any extra commentary, Just html not other junk like what is newly added or anything else. if asked other than that return only html code",
 			});
 		} else if (slug === "ai-chat") {
 			builtMessages = buildGooglePrompt(messages, {

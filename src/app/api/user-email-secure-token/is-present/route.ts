@@ -3,7 +3,7 @@ import serverApiRequest from "@/utils/api/server-api-request";
 import IS_USER_EMAIL_SECURE_TOKEN_PRESENT from "@/utils/endpoints/external/email-secure-token/is-present";
 import { getUserId } from "@/lib/session/session";
 
-export async function GET(request: Request) {
+export async function GET() {
 	try {
 		const userId = await getUserId();
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import serverApiRequest from "@/utils/api/server-api-request";
-import GET_ACCESS_MODIFIER_BY_ID from "@/utils/endpoints/external/access-modifier/get-by-id";
+import GET_ACCESS_MODIFIER_BY_ID from "@/utils/endpoints/external/data-access-modifier/get-by-id";
 
 export async function GET(
 	request: Request,

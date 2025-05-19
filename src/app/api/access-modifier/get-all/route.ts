@@ -1,5 +1,5 @@
 import serverApiRequest from "@/utils/api/server-api-request";
-import GET_ALL_ACCESS_MODIFIERS from "@/utils/endpoints/external/access-modifier/get-all";
+import GET_ALL_ACCESS_MODIFIERS from "@/utils/endpoints/external/data-access-modifier/get-all";
 import { NextResponse } from "next/server";
 
 export async function GET() {
